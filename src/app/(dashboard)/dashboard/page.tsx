@@ -51,13 +51,14 @@ export default function DashboardPage() {
         setRecentCompanies(companies.slice(0, 5));
         setReminders(Array.isArray(remindersData) ? remindersData.slice(0, 5) : []);
 
+        // Calculer les stats à partir des toutes les entreprises
         const allRes = await fetch("/api/entreprises?limit=1000");
         const allData = await allRes.json();
         const all = allData.companies || [];
 
         setStats({
           total: allData.pagination?.total || all.length,
-          enAttente: all.filter((c: any) => c.contactStatus === "EL_ATTENTE").length,
+          enAttente: all.filter((c: any) => c.contactStatus === "EN_ATTENTE").length,
           pmsmp: all.filter((c: any) => c.contactStatus === "PMSMP").length,
           contrats: all.filter((c: any) => c.contactStatus === "CONTRAT").length,
         });
@@ -104,15 +105,17 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
           Bonjour {session?.user?.firstName} !
         </h1>
         <p className="mt-1 text-gray-500">
-          Voici le resume de votre activite de prospection.
+          Voici le résumé de votre activité de prospection.
         </p>
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat) => (
           <div key={stat.label} className="card p-5">
@@ -130,6 +133,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Rappels */}
         <div className="card">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -166,11 +170,12 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Dernières entreprises */}
         <div className="card">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Building2 className="h-5 w-5 text-primary-500" />
-              Dernieres entreprises
+              Dernières entreprises
             </h2>
             <Link
               href="/entreprises"
