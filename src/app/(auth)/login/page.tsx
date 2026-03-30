@@ -107,9 +107,9 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-4 text-center text-xs text-gray-500">
-          Mediation Active &mdash; SEVE Emploi v3.0
+          Médiation Active &mdash; SEVE Emploi v3.0
         </p>
       </div>
     </div>
   );
-          }
+}
