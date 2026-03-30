@@ -69,13 +69,13 @@ export default function EntreprisesPage() {
     try {
       const res = await fetch(`/api/entreprises/${id}`, { method: "DELETE" });
       if (res.ok) {
-        toast.success("Entreprise supprimee");
+        toast.success("Entreprise supprimée");
         setCompanies((prev) => prev.filter((c) => c.id !== id));
       } else {
         toast.error("Erreur lors de la suppression");
       }
     } catch {
-      toast.error("Erreur reseau");
+      toast.error("Erreur réseau");
     }
   };
 
@@ -103,6 +103,7 @@ export default function EntreprisesPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Entreprises</h1>
@@ -120,6 +121,7 @@ export default function EntreprisesPage() {
         </button>
       </div>
 
+      {/* Filtres */}
       <div className="card p-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
@@ -156,6 +158,7 @@ export default function EntreprisesPage() {
         </div>
       </div>
 
+      {/* Liste */}
       {loading ? (
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
@@ -167,7 +170,7 @@ export default function EntreprisesPage() {
             Aucune entreprise
           </h3>
           <p className="text-gray-500 mb-4">
-            Commencez par ajouter une entreprise a votre portefeuille.
+            Commencez par ajouter une entreprise à votre portefeuille.
           </p>
           <button
             onClick={() => setIsFormOpen(true)}
@@ -179,15 +182,26 @@ export default function EntreprisesPage() {
         </div>
       ) : (
         <div className="card overflow-hidden">
+          {/* Table desktop */}
           <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entreprise</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Secteur</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Entreprise
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Secteur
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Contact
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Statut
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -197,25 +211,31 @@ export default function EntreprisesPage() {
                       <div className="flex items-center gap-3">
                         <Building2 className="h-5 w-5 text-gray-400 flex-shrink-0" />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{company.companyName}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {company.companyName}
+                          </p>
                           <p className="text-xs text-gray-500 flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
-                            {company.city || "Non renseigne"}
+                            {company.city || "Non renseigné"}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{company.sector || "-"}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {company.sector || "-"}
+                    </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-500 flex items-center gap-1">
                         <Phone className="h-3.5 w-3.5" />
-                        {company.phone || "Non renseigne"}
+                        {company.phone || "Non renseigné"}
                       </div>
                       <div className="text-xs text-gray-400 mt-0.5">
                         {company._count.contacts} interaction{company._count.contacts > 1 ? "s" : ""}
                       </div>
                     </td>
-                    <td className="px-6 py-4">{statusBadge(company.contactStatus)}</td>
+                    <td className="px-6 py-4">
+                      {statusBadge(company.contactStatus)}
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button
@@ -240,6 +260,7 @@ export default function EntreprisesPage() {
             </table>
           </div>
 
+          {/* Cards mobile */}
           <div className="md:hidden divide-y divide-gray-100">
             {companies.map((company) => (
               <div key={company.id} className="p-4 hover:bg-gray-50">
@@ -277,6 +298,7 @@ export default function EntreprisesPage() {
         </div>
       )}
 
+      {/* Modal formulaire */}
       {isFormOpen && (
         <CompanyFormModal
           company={editingCompany}
