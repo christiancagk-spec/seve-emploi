@@ -19,7 +19,7 @@ export default function AdminPage() {
           Administration
         </h1>
         <p className="text-gray-500 text-sm mt-1">
-          Gestion des utilisateurs et des paramÃ¨tres
+          Gestion des utilisateurs et des paramètres
         </p>
       </div>
 
@@ -30,22 +30,22 @@ export default function AdminPage() {
             <h2 className="text-lg font-semibold text-gray-900">Utilisateurs</h2>
           </div>
           <p className="text-sm text-gray-500 mb-4">
-            GÃ©rez les comptes utilisateurs, attribuez les rÃ´les et
-            activez/dÃ©sactivez les accÃ¨s.
+            Gérez les comptes utilisateurs, attribuez les rôles et
+            activez/désactivez les accès.
           </p>
           <button className="btn-primary">
-            GÃ©rer les utilisateurs
+            Gérer les utilisateurs
           </button>
         </div>
 
         <div className="card p-6">
           <div className="flex items-center gap-3 mb-4">
             <Settings className="h-6 w-6 text-primary-500" />
-            <h2 className="text-lg font-semibold text-gray-900">ParamÃ¨tres</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Paramètres</h2>
           </div>
           <p className="text-sm text-gray-500 mb-4">
             Configurez les listes de secteurs, les statuts et les
-            paramÃ¨tres gÃ©nÃ©raux de l'application.
+            paramètres généraux de l'application.
           </p>
           <button className="btn-secondary">
             Configurer
