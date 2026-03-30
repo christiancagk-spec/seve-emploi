@@ -44,14 +44,14 @@ export default function BeneficiairesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">BÃ©nÃ©ficiaires</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Bénéficiaires</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Suivi des bÃ©nÃ©ficiaires et leurs parcours
+            Suivi des bénéficiaires et leurs parcours
           </p>
         </div>
         <button className="btn-primary">
           <Plus className="h-5 w-5 mr-2" />
-          Nouveau bÃ©nÃ©ficiaire
+          Nouveau bénéficiaire
         </button>
       </div>
 
@@ -77,7 +77,7 @@ export default function BeneficiairesPage() {
         <input
           type="text"
           className="input pl-10"
-          placeholder="Rechercher un bÃ©nÃ©ficiaire..."
+          placeholder="Rechercher un bénéficiaire..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -91,7 +91,7 @@ export default function BeneficiairesPage() {
       ) : filtered.length === 0 ? (
         <div className="card p-12 text-center">
           <Users className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900">Aucun bÃ©nÃ©ficiaire</h3>
+          <h3 className="text-lg font-medium text-gray-900">Aucun bénéficiaire</h3>
         </div>
       ) : (
         <div className="card divide-y divide-gray-100">
@@ -112,7 +112,7 @@ export default function BeneficiairesPage() {
                       {b.firstName} {b.lastName}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {b.targetJob || "Poste non renseignÃ©"}
+                      {b.targetJob || "Poste non renseigné"}
                     </p>
                   </div>
                 </div>
