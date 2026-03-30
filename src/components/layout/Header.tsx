@@ -63,7 +63,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   className="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
                 >
                   <LogOut className="h-4 w-4" />
-                  DÃ©connexion
+                  Déconnexion
                 </button>
               </div>
             </>
