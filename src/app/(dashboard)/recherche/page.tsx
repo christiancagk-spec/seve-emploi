@@ -54,9 +54,9 @@ export default function RecherchePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Recherche avancÃ©e</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Recherche avancée</h1>
         <p className="text-gray-500 text-sm mt-1">
-          Recherchez des entreprises avec des filtres combinÃ©s
+          Recherchez des entreprises avec des filtres combinés
         </p>
       </div>
 
@@ -70,7 +70,7 @@ export default function RecherchePage() {
                 <input
                   type="text"
                   className="input pl-10"
-                  placeholder="Nom, ville, tÃ©lÃ©phone..."
+                  placeholder="Nom, ville, téléphone..."
                   value={params.search}
                   onChange={(e) => setParams({ ...params, search: e.target.value })}
                 />
@@ -117,12 +117,12 @@ export default function RecherchePage() {
         <div className="card">
           <div className="px-6 py-4 border-b border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900">
-              {results.length} rÃ©sultat{results.length > 1 ? "s" : ""}
+              {results.length} résultat{results.length > 1 ? "s" : ""}
             </h2>
           </div>
           {results.length === 0 ? (
             <div className="p-12 text-center text-gray-400">
-              Aucun rÃ©sultat pour ces critÃ¨res
+              Aucun résultat pour ces critères
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
