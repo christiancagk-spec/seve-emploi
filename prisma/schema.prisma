@@ -1,0 +1,247 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// UTILISATEURS & AUTHENTIFICATION
+// ============================================================
+
+enum Role {
+  ADMIN
+  REFERENT
+  LECTEUR
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  hashedPassword String
+  firstName      String
+  lastName       String
+  role           Role      @default(REFERENT)
+  active         Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  companies      Company[]       @relation("CreatedByUser")
+  supervisedCompanies Company[]  @relation("SupervisorUser")
+  beneficiaries  Beneficiary[]   @relation("SupervisorBeneficiary")
+  contacts       Contact[]
+  reminders      Reminder[]
+
+  @@map("users")
+}
+
+// ============================================================
+// ENTREPRISES (PROSPECTION)
+// ============================================================
+
+enum ContactStatus {
+  EN_ATTENTE
+  PMSMP
+  CONTRAT
+  REFUS
+}
+
+model Company {
+  id             String        @id @default(cuid())
+  companyName    String
+  address        String        @default("")
+  city           String        @default("")
+  phone          String        @default("")
+  email          String        @default("")
+  sector         String        @default("")
+  contactStatus  ContactStatus @default(EN_ATTENTE)
+  notes          String        @default("")
+  deleted        Boolean       @default(false)
+  deletedAt      DateTime?
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  createdBy      User          @relation("CreatedByUser", fields: [createdById], references: [id])
+  createdById    String
+  supervisor     User          @relation("SupervisorUser", fields: [supervisorId], references: [id])
+  supervisorId   String
+
+  contacts       Contact[]
+  reminders      Reminder[]
+  prospections   Prospection[]
+  companyContacts CompanyContact[]
+
+  @@index([supervisorId])
+  @@index([contactStatus])
+  @@index([sector])
+  @@index([deleted])
+  @@map("companies")
+}
+
+// ============================================================
+// CONTACTS D'ENTREPRISE (personnes physiques)
+// ============================================================
+
+model CompanyContact {
+  id        String   @id @default(cuid())
+  name      String
+  position  String   @default("") // Direction, RH, etc.
+  phone     String   @default("")
+  email     String   @default("")
+
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("company_contacts")
+}
+
+// ============================================================
+// HISTORIQUE DES INTERACTIONS
+// ============================================================
+
+enum ContactType {
+  APPEL
+  EMAIL
+  VISITE
+  AUTRE
+}
+
+enum ContactOutcome {
+  POSITIF
+  NEGATIF
+  EN_ATTENTE
+}
+
+model Contact {
+  id            String         @id @default(cuid())
+  date          DateTime       @default(now())
+  type          ContactType
+  outcome       ContactOutcome @default(EN_ATTENTE)
+  comment       String         @default("")
+
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId     String
+
+  beneficiary   Beneficiary?   @relation(fields: [beneficiaryId], references: [id])
+  beneficiaryId String?
+
+  createdBy     User           @relation(fields: [createdById], references: [id])
+  createdById   String
+
+  createdAt     DateTime       @default(now())
+
+  @@index([companyId])
+  @@index([beneficiaryId])
+  @@index([date])
+  @@map("contacts")
+}
+
+// ============================================================
+// BÉNÉFICIAIRES
+// ============================================================
+
+model Beneficiary {
+  id           String   @id @default(cuid())
+  firstName    String
+  lastName     String
+  targetJob    String   @default("")
+  phone        String   @default("")
+  email        String   @default("")
+  notes        String   @default("")
+
+  supervisor   User     @relation("SupervisorBeneficiary", fields: [supervisorId], references: [id])
+  supervisorId String
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  prospections Prospection[]
+  contacts     Contact[]
+
+  @@index([supervisorId])
+  @@map("beneficiaries")
+}
+
+// ============================================================
+// PROSPECTIONS (liaison bénéficiaire/entreprise)
+// ============================================================
+
+enum ProspectionStatus {
+  EN_COURS
+  PMSMP
+  CONTRAT
+  REFUS
+  TERMINE
+}
+
+model Prospection {
+  id            String            @id @default(cuid())
+  status        ProspectionStatus @default(EN_COURS)
+  startDate     DateTime          @default(now())
+  endDate       DateTime?
+  notes         String            @default("")
+  outcome       String            @default("")
+
+  company       Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId     String
+
+  beneficiary   Beneficiary       @relation(fields: [beneficiaryId], references: [id], onDelete: Cascade)
+  beneficiaryId String
+
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([companyId])
+  @@index([beneficiaryId])
+  @@index([status])
+  @@map("prospections")
+}
+
+// ============================================================
+// RAPPELS & ÉCHÉANCES
+// ============================================================
+
+enum ReminderType {
+  SUIVI
+  ECHEANCE
+  OPPORTUNITE
+}
+
+enum ReminderStatus {
+  EN_ATTENTE
+  COMPLETE
+  ANNULE
+}
+
+model Reminder {
+  id            String         @id @default(cuid())
+  date          DateTime
+  type          ReminderType   @default(SUIVI)
+  status        ReminderStatus @default(EN_ATTENTE)
+  comment       String         @default("")
+
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId     String
+
+  beneficiaryId String?
+
+  createdBy     User           @relation(fields: [createdById], references: [id])
+  createdById   String
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([date])
+  @@index([status])
+  @@index([createdById])
+  @@map("reminders")
+}
