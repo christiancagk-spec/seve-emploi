@@ -49,14 +49,14 @@ export default function BeneficiaryFormModal({ beneficiary, onClose, onSuccess }
       });
 
       if (res.ok) {
-        toast.success(isEditing ? "B\u00e9n\u00e9ficiaire mis \u00e0 jour" : "B\u00e9n\u00e9ficiaire cr\u00e9\u00e9");
+        toast.success(isEditing ? "Bénéficiaire mis à jour" : "Bénéficiaire créé");
         onSuccess();
       } else {
         const data = await res.json();
         toast.error(data.error || "Erreur");
       }
     } catch {
-      toast.error("Erreur r\u00e9seau");
+      toast.error("Erreur réseau");
     } finally {
       setSubmitting(false);
     }
@@ -68,7 +68,7 @@ export default function BeneficiaryFormModal({ beneficiary, onClose, onSuccess }
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
             <Users className="h-5 w-5 text-primary-500" />
-            {isEditing ? "Modifier le b\u00e9n\u00e9ficiaire" : "Nouveau b\u00e9n\u00e9ficiaire"}
+            {isEditing ? "Modifier le bénéficiaire" : "Nouveau bénéficiaire"}
           </h2>
           <button
             onClick={onClose}
@@ -81,11 +81,11 @@ export default function BeneficiaryFormModal({ beneficiary, onClose, onSuccess }
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="label">Pr\u00e9nom *</label>
+              <label className="label">Prénom *</label>
               <input
                 type="text"
                 className="input"
-                placeholder="Pr\u00e9nom"
+                placeholder="Prénom"
                 required
                 value={form.firstName}
                 onChange={(e) => setForm({ ...form, firstName: e.target.value })}
@@ -105,11 +105,11 @@ export default function BeneficiaryFormModal({ beneficiary, onClose, onSuccess }
           </div>
 
           <div>
-            <label className="label">Poste recherch\u00e9</label>
+            <label className="label">Poste recherché</label>
             <input
               type="text"
               className="input"
-              placeholder="Ex: Aide-soignante, Ma\u00e7on..."
+              placeholder="Ex: Aide-soignante, Maçon..."
               value={form.targetJob}
               onChange={(e) => setForm({ ...form, targetJob: e.target.value })}
             />
@@ -117,7 +117,7 @@ export default function BeneficiaryFormModal({ beneficiary, onClose, onSuccess }
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="label">T\u00e9l\u00e9phone</label>
+              <label className="label">Téléphone</label>
               <input
                 type="tel"
                 className="input"
@@ -143,7 +143,7 @@ export default function BeneficiaryFormModal({ beneficiary, onClose, onSuccess }
             <textarea
               className="input"
               rows={3}
-              placeholder="Notes sur le b\u00e9n\u00e9ficiaire..."
+              placeholder="Notes sur le bénéficiaire..."
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
             />
