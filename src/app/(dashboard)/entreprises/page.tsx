@@ -64,18 +64,18 @@ export default function EntreprisesPage() {
   }, [fetchCompanies]);
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Supprimer l'entreprise "${name}" ?`)) return;
+    if (!confirm(`Supprimer l'entreprise \"${name}\" ?`)) return;
 
     try {
       const res = await fetch(`/api/entreprises/${id}`, { method: "DELETE" });
       if (res.ok) {
-        toast.success("Entreprise supprimée");
+        toast.success("Entreprise supprim\u00e9e");
         setCompanies((prev) => prev.filter((c) => c.id !== id));
       } else {
         toast.error("Erreur lors de la suppression");
       }
     } catch {
-      toast.error("Erreur réseau");
+      toast.error("Erreur r\u00e9seau");
     }
   };
 
@@ -170,7 +170,7 @@ export default function EntreprisesPage() {
             Aucune entreprise
           </h3>
           <p className="text-gray-500 mb-4">
-            Commencez par ajouter une entreprise à votre portefeuille.
+            Commencez par ajouter une entreprise \u00e0 votre portefeuille.
           </p>
           <button
             onClick={() => setIsFormOpen(true)}
@@ -211,12 +211,12 @@ export default function EntreprisesPage() {
                       <div className="flex items-center gap-3">
                         <Building2 className="h-5 w-5 text-gray-400 flex-shrink-0" />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <Link href={`/entreprises/${company.id}`} className="text-sm font-medium text-gray-900 hover:text-primary-600 hover:underline">
                             {company.companyName}
-                          </p>
+                          </Link>
                           <p className="text-xs text-gray-500 flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
-                            {company.city || "Non renseigné"}
+                            {company.city || "Non renseign\u00e9"}
                           </p>
                         </div>
                       </div>
@@ -227,7 +227,7 @@ export default function EntreprisesPage() {
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-500 flex items-center gap-1">
                         <Phone className="h-3.5 w-3.5" />
-                        {company.phone || "Non renseigné"}
+                        {company.phone || "Non renseign\u00e9"}
                       </div>
                       <div className="text-xs text-gray-400 mt-0.5">
                         {company._count.contacts} interaction{company._count.contacts > 1 ? "s" : ""}
@@ -238,6 +238,13 @@ export default function EntreprisesPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
+                        <Link
+                          href={`/entreprises/${company.id}`}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50"
+                          title="Voir la fiche"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Link>
                         <button
                           onClick={() => { setEditingCompany(company); setIsFormOpen(true); }}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50"
@@ -266,7 +273,7 @@ export default function EntreprisesPage() {
               <div key={company.id} className="p-4 hover:bg-gray-50">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-medium text-gray-900">{company.companyName}</p>
+                    <Link href={`/entreprises/${company.id}`} className="font-medium text-gray-900 hover:text-primary-600 hover:underline">{company.companyName}</Link>
                     <p className="text-sm text-gray-500 mt-0.5">{company.city} &middot; {company.sector}</p>
                     {company.phone && (
                       <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
