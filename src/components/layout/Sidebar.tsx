@@ -15,7 +15,7 @@ import {
 const navigation = [
   { name: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
   { name: "Entreprises", href: "/entreprises", icon: Building2 },
-  { name: "Bénéficiaires", href: "/beneficiaires", icon: Users },
+  { name: "Salariés en transition", href: "/beneficiaires", icon: Users },
   { name: "Recherche", href: "/recherche", icon: Search },
 ];
 
