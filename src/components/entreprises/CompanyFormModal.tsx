@@ -71,14 +71,14 @@ export default function CompanyFormModal({ company, onClose, onSuccess }: Props)
       });
 
       if (res.ok) {
-        toast.success(isEditing ? "Entreprise mise Ã  jour" : "Entreprise crÃ©Ã©e");
+        toast.success(isEditing ? "Entreprise mise à jour" : "Entreprise créée");
         onSuccess();
       } else {
         const data = await res.json();
         toast.error(data.error || "Erreur");
       }
     } catch {
-      toast.error("Erreur rÃ©seau");
+      toast.error("Erreur réseau");
     } finally {
       setSubmitting(false);
     }
@@ -108,7 +108,7 @@ export default function CompanyFormModal({ company, onClose, onSuccess }: Props)
             <input
               type="text"
               className="input"
-              placeholder="Ex: SociÃ©tÃ© Exemple"
+              placeholder="Ex: Société Exemple"
               required
               value={form.companyName}
               onChange={(e) => setForm({ ...form, companyName: e.target.value })}
@@ -121,7 +121,7 @@ export default function CompanyFormModal({ company, onClose, onSuccess }: Props)
               <input
                 type="text"
                 className="input"
-                placeholder="Adresse complÃ¨te"
+                placeholder="Adresse complète"
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
               />
@@ -140,7 +140,7 @@ export default function CompanyFormModal({ company, onClose, onSuccess }: Props)
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="label">TÃ©lÃ©phone</label>
+              <label className="label">Téléphone</label>
               <input
                 type="tel"
                 className="input"
@@ -163,13 +163,13 @@ export default function CompanyFormModal({ company, onClose, onSuccess }: Props)
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="label">Secteur d'activitÃ©</label>
+              <label className="label">Secteur d'activité</label>
               <select
                 className="input"
                 value={showCustomSector ? "__custom__" : form.sector}
                 onChange={(e) => handleSectorChange(e.target.value)}
               >
-                <option value="">SÃ©lectionner un secteur</option>
+                <option value="">Sélectionner un secteur</option>
                 {SECTORS.map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}
@@ -179,7 +179,7 @@ export default function CompanyFormModal({ company, onClose, onSuccess }: Props)
                 <input
                   type="text"
                   className="input mt-2"
-                  placeholder="Secteur personnalisÃ©"
+                  placeholder="Secteur personnalisé"
                   value={customSector}
                   onChange={(e) => setCustomSector(e.target.value)}
                 />
