@@ -57,12 +57,12 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     if (error.name === "ZodError") {
       return NextResponse.json(
-        { error: "Donn\u00e9es invalides", details: error.errors },
+        { error: "Données invalides", details: error.errors },
         { status: 400 }
       );
     }
     return NextResponse.json(
-      { error: "Erreur lors de la cr\u00e9ation" },
+      { error: "Erreur lors de la création" },
       { status: 500 }
     );
   }
