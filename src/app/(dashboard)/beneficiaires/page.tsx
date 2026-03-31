@@ -5,6 +5,7 @@ import { Users, Plus, Search, Building2, ArrowRight, Pencil, ChevronDown, Chevro
 import toast from "react-hot-toast";
 import Link from "next/link";
 import BeneficiaryFormModal from "@/components/beneficiaires/BeneficiaryFormModal";
+import ProspectionFormModal from "@/components/beneficiaires/ProspectionFormModal";
 
 export default function BeneficiairesPage() {
   const [beneficiaries, setBeneficiaries] = useState<any[]>([]);
@@ -13,6 +14,7 @@ export default function BeneficiairesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBeneficiary, setEditingBeneficiary] = useState<any>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [prospectionTarget, setProspectionTarget] = useState<any>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -52,11 +54,16 @@ export default function BeneficiairesPage() {
     fetchData();
   };
 
+  const handleProspectionSuccess = () => {
+    setProspectionTarget(null);
+    fetchData();
+  };
+
   const statusLabel: Record<string, string> = {
     EN_COURS: "En cours",
-    PMSMP: "PMSMP",
+    PMSMP: "PMSMP (immersion)",
     CONTRAT: "Contrat",
-    REFUS: "Refus",
+    REFUS: "Refusé",
     TERMINE: "Terminé",
   };
 
@@ -74,7 +81,7 @@ export default function BeneficiairesPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Bénéficiaires</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Suivi des bénéficiaires et leurs parcours
+            Suivi des bénéficiaires et leurs parcours en entreprise
           </p>
         </div>
         <button
@@ -93,7 +100,7 @@ export default function BeneficiairesPage() {
           <p className="text-2xl font-bold text-primary-600">{stats.total}</p>
         </div>
         <div className="card p-4">
-          <p className="text-sm text-gray-500">En PMSMP</p>
+          <p className="text-sm text-gray-500">En PMSMP / immersion</p>
           <p className="text-2xl font-bold text-green-600">{stats.pmsmp}</p>
         </div>
         <div className="card p-4">
@@ -176,14 +183,26 @@ export default function BeneficiairesPage() {
                 </div>
               </div>
 
-              {/* Historique des prospections */}
+              {/* Historique stages / immersions */}
               {expandedId === b.id && (
                 <div className="px-4 pb-4">
                   <div className="ml-13 bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                      <Building2 className="h-4 w-4" />
-                      Historique entreprises
-                    </h4>
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        <Building2 className="h-4 w-4" />
+                        Historique entreprises (stages / immersions)
+                      </h4>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setProspectionTarget(b);
+                        }}
+                        className="text-xs btn-primary py-1 px-3"
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Ajouter
+                      </button>
+                    </div>
                     {b.prospections && b.prospections.length > 0 ? (
                       <div className="space-y-2">
                         {b.prospections.map((p: any) => (
@@ -202,6 +221,9 @@ export default function BeneficiairesPage() {
                                   {p.startDate ? new Date(p.startDate).toLocaleDateString("fr-FR") : ""}
                                   {p.endDate ? ` - ${new Date(p.endDate).toLocaleDateString("fr-FR")}` : " - en cours"}
                                 </p>
+                                {p.notes && (
+                                  <p className="text-xs text-gray-500 italic mt-0.5">{p.notes}</p>
+                                )}
                               </div>
                             </div>
                             <span className={statusClass[p.status] || "badge"}>
@@ -211,7 +233,7 @@ export default function BeneficiairesPage() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-400 italic">Aucune prospection pour ce bénéficiaire</p>
+                      <p className="text-sm text-gray-400 italic">Aucun stage / immersion enregistré pour ce bénéficiaire</p>
                     )}
                   </div>
                 </div>
@@ -221,12 +243,22 @@ export default function BeneficiairesPage() {
         </div>
       )}
 
-      {/* Modal formulaire */}
+      {/* Modal formulaire bénéficiaire */}
       {isFormOpen && (
         <BeneficiaryFormModal
           beneficiary={editingBeneficiary}
           onClose={() => { setIsFormOpen(false); setEditingBeneficiary(null); }}
           onSuccess={handleFormSuccess}
+        />
+      )}
+
+      {/* Modal ajout prospection / stage */}
+      {prospectionTarget && (
+        <ProspectionFormModal
+          beneficiaryId={prospectionTarget.id}
+          beneficiaryName={`${prospectionTarget.firstName} ${prospectionTarget.lastName}`}
+          onClose={() => setProspectionTarget(null)}
+          onSuccess={handleProspectionSuccess}
         />
       )}
     </div>
