@@ -25,7 +25,10 @@ export async function GET(request: NextRequest) {
         },
       },
       prospections: {
-        select: { status: true },
+        orderBy: { startDate: "desc" as const },
+        include: {
+          company: { select: { id: true, companyName: true, city: true, sector: true } },
+        },
       },
     },
     orderBy: { updatedAt: "desc" },
@@ -54,12 +57,12 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     if (error.name === "ZodError") {
       return NextResponse.json(
-        { error: "DonnÃ©es invalides", details: error.errors },
+        { error: "Donn\u00e9es invalides", details: error.errors },
         { status: 400 }
       );
     }
     return NextResponse.json(
-      { error: "Erreur lors de la crÃ©ation" },
+      { error: "Erreur lors de la cr\u00e9ation" },
       { status: 500 }
     );
   }
