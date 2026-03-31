@@ -200,12 +200,12 @@ export default function CompanyDetailPage() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Prospections / Bénéficiaires */}
+        {/* Prospections / Salariés en transition */}
         <div className="card">
           <div className="px-6 py-4 border-b border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Users className="h-5 w-5 text-primary-500" />
-              Bénéficiaires accueillis (stages / immersions)
+              Salariés en transition accueillis (stages / immersions)
             </h2>
           </div>
           <div className="divide-y divide-gray-50">
@@ -237,7 +237,7 @@ export default function CompanyDetailPage() {
             ) : (
               <div className="p-6 text-center text-gray-400">
                 <Users className="h-8 w-8 mx-auto mb-2" />
-                <p>Aucun bénéficiaire accueilli pour le moment</p>
+                <p>Aucun salarié en transition accueilli pour le moment</p>
               </div>
             )}
           </div>
