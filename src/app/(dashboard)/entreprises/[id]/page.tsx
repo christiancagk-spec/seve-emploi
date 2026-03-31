@@ -30,7 +30,7 @@ export default function CompanyDetailPage() {
     try {
       const res = await fetch(`/api/entreprises/${params.id}`);
       if (!res.ok) {
-        toast.error("Entreprise non trouv\u00e9e");
+        toast.error("Entreprise non trouvée");
         router.push("/entreprises");
         return;
       }
@@ -71,7 +71,7 @@ export default function CompanyDetailPage() {
     PMSMP: "PMSMP",
     CONTRAT: "Contrat",
     REFUS: "Refus",
-    TERMINE: "Termin\u00e9",
+    TERMINE: "Terminé",
   };
 
   if (loading) {
@@ -128,7 +128,7 @@ export default function CompanyDetailPage() {
       {/* Info cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card p-5">
-          <h3 className="text-sm font-medium text-gray-500 mb-3">Coordonn\u00e9es</h3>
+          <h3 className="text-sm font-medium text-gray-500 mb-3">Coordonnées</h3>
           <div className="space-y-2">
             {company.phone && (
               <p className="flex items-center gap-2 text-sm text-gray-700">
@@ -149,13 +149,13 @@ export default function CompanyDetailPage() {
               </p>
             )}
             {!company.phone && !company.email && !company.address && (
-              <p className="text-sm text-gray-400 italic">Aucune coordonn\u00e9e renseign\u00e9e</p>
+              <p className="text-sm text-gray-400 italic">Aucune coordonnée renseignée</p>
             )}
           </div>
         </div>
 
         <div className="card p-5">
-          <h3 className="text-sm font-medium text-gray-500 mb-3">R\u00e9f\u00e9rent</h3>
+          <h3 className="text-sm font-medium text-gray-500 mb-3">Référent</h3>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
               <User className="h-5 w-5 text-primary-600" />
@@ -200,12 +200,12 @@ export default function CompanyDetailPage() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Prospections / B\u00e9n\u00e9ficiaires */}
+        {/* Prospections / Bénéficiaires */}
         <div className="card">
           <div className="px-6 py-4 border-b border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Users className="h-5 w-5 text-primary-500" />
-              B\u00e9n\u00e9ficiaires en prospection
+              Bénéficiaires en prospection
             </h2>
           </div>
           <div className="divide-y divide-gray-50">
@@ -218,7 +218,7 @@ export default function CompanyDetailPage() {
                         {p.beneficiary?.firstName} {p.beneficiary?.lastName}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {p.beneficiary?.targetJob || "Poste non renseign\u00e9"}
+                        {p.beneficiary?.targetJob || "Poste non renseigné"}
                       </p>
                       <p className="text-xs text-gray-400 mt-0.5">
                         Depuis le {new Date(p.startDate).toLocaleDateString("fr-FR")}
@@ -237,7 +237,7 @@ export default function CompanyDetailPage() {
             ) : (
               <div className="p-6 text-center text-gray-400">
                 <Users className="h-8 w-8 mx-auto mb-2" />
-                <p>Aucun b\u00e9n\u00e9ficiaire en prospection</p>
+                <p>Aucun bénéficiaire en prospection</p>
               </div>
             )}
           </div>
@@ -274,7 +274,7 @@ export default function CompanyDetailPage() {
             ) : (
               <div className="p-6 text-center text-gray-400">
                 <Clock className="h-8 w-8 mx-auto mb-2" />
-                <p>Aucune interaction enregistr\u00e9e</p>
+                <p>Aucune interaction enregistrée</p>
               </div>
             )}
           </div>
