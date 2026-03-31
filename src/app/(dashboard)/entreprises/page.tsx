@@ -69,13 +69,13 @@ export default function EntreprisesPage() {
     try {
       const res = await fetch(`/api/entreprises/${id}`, { method: "DELETE" });
       if (res.ok) {
-        toast.success("Entreprise supprim\u00e9e");
+        toast.success("Entreprise supprimée");
         setCompanies((prev) => prev.filter((c) => c.id !== id));
       } else {
         toast.error("Erreur lors de la suppression");
       }
     } catch {
-      toast.error("Erreur r\u00e9seau");
+      toast.error("Erreur réseau");
     }
   };
 
@@ -170,7 +170,7 @@ export default function EntreprisesPage() {
             Aucune entreprise
           </h3>
           <p className="text-gray-500 mb-4">
-            Commencez par ajouter une entreprise \u00e0 votre portefeuille.
+            Commencez par ajouter une entreprise à votre portefeuille.
           </p>
           <button
             onClick={() => setIsFormOpen(true)}
@@ -216,7 +216,7 @@ export default function EntreprisesPage() {
                           </Link>
                           <p className="text-xs text-gray-500 flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
-                            {company.city || "Non renseign\u00e9"}
+                            {company.city || "Non renseigné"}
                           </p>
                         </div>
                       </div>
@@ -227,7 +227,7 @@ export default function EntreprisesPage() {
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-500 flex items-center gap-1">
                         <Phone className="h-3.5 w-3.5" />
-                        {company.phone || "Non renseign\u00e9"}
+                        {company.phone || "Non renseigné"}
                       </div>
                       <div className="text-xs text-gray-400 mt-0.5">
                         {company._count.contacts} interaction{company._count.contacts > 1 ? "s" : ""}
