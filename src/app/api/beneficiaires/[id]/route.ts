@@ -32,7 +32,7 @@ export async function GET(
   });
 
   if (!beneficiary) {
-    return NextResponse.json({ error: "B\u00e9n\u00e9ficiaire non trouv\u00e9" }, { status: 404 });
+    return NextResponse.json({ error: "Bénéficiaire non trouvé" }, { status: 404 });
   }
 
   if (user.role === "REFERENT" && beneficiary.supervisorId !== user.id) {
@@ -55,7 +55,7 @@ export async function PATCH(
   });
 
   if (!existing) {
-    return NextResponse.json({ error: "B\u00e9n\u00e9ficiaire non trouv\u00e9" }, { status: 404 });
+    return NextResponse.json({ error: "Bénéficiaire non trouvé" }, { status: 404 });
   }
 
   if (user.role === "REFERENT" && existing.supervisorId !== user.id) {
@@ -75,12 +75,12 @@ export async function PATCH(
   } catch (error: any) {
     if (error.name === "ZodError") {
       return NextResponse.json(
-        { error: "Donn\u00e9es invalides", details: error.errors },
+        { error: "Données invalides", details: error.errors },
         { status: 400 }
       );
     }
     return NextResponse.json(
-      { error: "Erreur lors de la mise \u00e0 jour" },
+      { error: "Erreur lors de la mise à jour" },
       { status: 500 }
     );
   }
