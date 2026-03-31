@@ -57,7 +57,7 @@ export default function BeneficiairesPage() {
     PMSMP: "PMSMP",
     CONTRAT: "Contrat",
     REFUS: "Refus",
-    TERMINE: "Termin\u00e9",
+    TERMINE: "Terminé",
   };
 
   const statusClass: Record<string, string> = {
@@ -72,9 +72,9 @@ export default function BeneficiairesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">B\u00e9n\u00e9ficiaires</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Bénéficiaires</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Suivi des b\u00e9n\u00e9ficiaires et leurs parcours
+            Suivi des bénéficiaires et leurs parcours
           </p>
         </div>
         <button
@@ -82,7 +82,7 @@ export default function BeneficiairesPage() {
           className="btn-primary"
         >
           <Plus className="h-5 w-5 mr-2" />
-          Nouveau b\u00e9n\u00e9ficiaire
+          Nouveau bénéficiaire
         </button>
       </div>
 
@@ -108,7 +108,7 @@ export default function BeneficiairesPage() {
         <input
           type="text"
           className="input pl-10"
-          placeholder="Rechercher un b\u00e9n\u00e9ficiaire..."
+          placeholder="Rechercher un bénéficiaire..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -122,14 +122,14 @@ export default function BeneficiairesPage() {
       ) : filtered.length === 0 ? (
         <div className="card p-12 text-center">
           <Users className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900">Aucun b\u00e9n\u00e9ficiaire</h3>
-          <p className="text-gray-500 mt-1 mb-4">Ajoutez votre premier b\u00e9n\u00e9ficiaire pour commencer le suivi.</p>
+          <h3 className="text-lg font-medium text-gray-900">Aucun bénéficiaire</h3>
+          <p className="text-gray-500 mt-1 mb-4">Ajoutez votre premier bénéficiaire pour commencer le suivi.</p>
           <button
             onClick={() => setIsFormOpen(true)}
             className="btn-primary"
           >
             <Plus className="h-5 w-5 mr-2" />
-            Ajouter un b\u00e9n\u00e9ficiaire
+            Ajouter un bénéficiaire
           </button>
         </div>
       ) : (
@@ -152,7 +152,7 @@ export default function BeneficiairesPage() {
                         {b.firstName} {b.lastName}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {b.targetJob || "Poste non renseign\u00e9"}
+                        {b.targetJob || "Poste non renseigné"}
                       </p>
                     </div>
                   </div>
@@ -211,7 +211,7 @@ export default function BeneficiairesPage() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-400 italic">Aucune prospection pour ce b\u00e9n\u00e9ficiaire</p>
+                      <p className="text-sm text-gray-400 italic">Aucune prospection pour ce bénéficiaire</p>
                     )}
                   </div>
                 </div>
