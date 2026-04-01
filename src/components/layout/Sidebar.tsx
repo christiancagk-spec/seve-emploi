@@ -48,7 +48,7 @@ export default function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
   const userInitial = session?.user?.firstName?.charAt(0)?.toUpperCase() || session?.user?.lastName?.charAt(0)?.toUpperCase() || "U";
   const userName = session?.user?.firstName
     ? `${session.user.firstName} ${session.user.lastName || ""}`.trim()
-    : session?.user?.name || "Utilisateur";
+    : session?.user?.email || "Utilisateur";
   const userRoleLabel = session?.user?.role?.toLowerCase() || "utilisateur";
 
   return (
@@ -151,9 +151,9 @@ export default function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
         <div className="px-5 py-4 border-t border-white/10">
           <a
             href={`${AGK_BASE_URL}/logout`}
-            className="text-green-300/60 hover:text-white text-sm transition-colors"
+            className="text-green-300/70 hover:text-white text-sm flex items-center gap-2 transition-colors"
           >
-            ← Déconnexion
+            Déconnexion
           </a>
         </div>
       </aside>
