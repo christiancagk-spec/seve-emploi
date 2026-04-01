@@ -2,20 +2,30 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
-  LayoutDashboard,
   Building2,
   Users,
   Search,
   Settings,
   X,
-  Bell,
 } from "lucide-react";
 
-const navigation = [
-  { name: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
+const AGK_BASE_URL = process.env.NEXT_PUBLIC_AGK_URL || "https://agk-app-production.up.railway.app";
+
+// Navigation AGK principale (liens vers l'app AGK)
+const agkNavigation = [
+  { name: "Tableau de bord", href: `${AGK_BASE_URL}/dashboard`, icon: "📊", external: true },
+  { name: "Salariés en transition", href: `${AGK_BASE_URL}/dashboard`, icon: "👥", external: true },
+  { name: "Suivi ACI", href: `${AGK_BASE_URL}/dashboard`, icon: "📋", external: true },
+  { name: "SEVE 2", href: `${AGK_BASE_URL}/dashboard`, icon: "🌿", external: true },
+];
+
+// Navigation du module Prospection (liens internes)
+const prospectionNav = [
+  { name: "Tableau de bord", href: "/dashboard", icon: Building2 },
   { name: "Entreprises", href: "/entreprises", icon: Building2 },
-  { name: "Bénéficiaires", href: "/beneficiaires", icon: Users },
+  { name: "Salariés en transition", href: "/beneficiaires", icon: Users },
   { name: "Recherche", href: "/recherche", icon: Search },
 ];
 
@@ -31,8 +41,15 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
-  const allNav = userRole === "ADMIN" ? [...navigation, ...adminNav] : navigation;
+  const allProspectionNav = userRole === "ADMIN" ? [...prospectionNav, ...adminNav] : prospectionNav;
+
+  const userInitial = session?.user?.firstName?.charAt(0)?.toUpperCase() || session?.user?.lastName?.charAt(0)?.toUpperCase() || "U";
+  const userName = session?.user?.firstName
+    ? `${session.user.firstName} ${session.user.lastName || ""}`.trim()
+    : session?.user?.name || "Utilisateur";
+  const userRoleLabel = session?.user?.role?.toLowerCase() || "utilisateur";
 
   return (
     <>
@@ -46,43 +63,99 @@ export default function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
+        className={`fixed inset-y-0 left-0 z-50 w-60 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        style={{ backgroundColor: "#0F2D18" }}
       >
-        <div className="flex items-center justify-between p-6">
-          <div>
-            <h2 className="text-xl font-bold text-primary-900">SEVE Emploi</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Module Prospection</p>
+        {/* Logo AGK */}
+        <div className="px-5 pt-5 pb-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="lg:hidden p-1 rounded-lg text-green-300 hover:text-white hover:bg-white/10 absolute top-3 right-3"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <span className="text-2xl">🌿</span>
+            <div>
+              <h1 className="text-white font-bold text-base leading-tight">An Grèn Kouler</h1>
+              <span className="text-green-400/70 text-xs">Écritures sociales · La Réunion</span>
+            </div>
           </div>
-          <button
-            onClick={onClose}
-            className="lg:hidden p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-          >
-            <X className="h-5 w-5" />
-          </button>
         </div>
 
-        <nav className="mt-2 px-3 space-y-1">
-          {allNav.map((item) => {
+        {/* User info */}
+        <div className="px-5 py-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-green-700 flex items-center justify-center text-white font-semibold text-sm">
+              {userInitial}
+            </div>
+            <div>
+              <div className="text-white text-sm font-medium leading-tight">{userName}</div>
+              <span className="inline-block mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-green-600 text-white">
+                {userRoleLabel}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation AGK */}
+        <nav className="mt-1 px-3 flex-1 overflow-y-auto">
+          <div className="mb-1">
+            <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-green-500/60">
+              Navigation
+            </p>
+          </div>
+
+          {agkNavigation.map((item) => (
+            <a
+              key={item.name}
+              href={item.href}
+              onClick={onClose}
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-green-200/80 hover:bg-white/10 hover:text-white transition-colors mb-0.5"
+            >
+              <span className="text-base">{item.icon}</span>
+              {item.name}
+            </a>
+          ))}
+
+          {/* Section Prospection SEVE */}
+          <div className="mt-4 mb-1">
+            <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-green-500/60">
+              Prospection SEVE
+            </p>
+          </div>
+
+          {allProspectionNav.map((item) => {
             const isActive = pathname.startsWith(item.href);
             return (
               <Link
-                key={item.name}
+                key={item.name + item.href}
                 href={item.href}
                 onClick={onClose}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-0.5 ${
                   isActive
-                    ? "bg-primary-50 text-primary-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? "bg-green-700 text-white"
+                    : "text-green-200/80 hover:bg-white/10 hover:text-white"
                 }`}
               >
-                <item.icon className="h-5 w-5 flex-shrink-0" />
+                <item.icon className="h-4 w-4 flex-shrink-0" />
                 {item.name}
               </Link>
             );
           })}
         </nav>
+
+        {/* Déconnexion en bas */}
+        <div className="px-5 py-4 border-t border-white/10">
+          <a
+            href={`${AGK_BASE_URL}/logout`}
+            className="text-green-300/60 hover:text-white text-sm transition-colors"
+          >
+            ← Déconnexion
+          </a>
+        </div>
       </aside>
     </>
   );

@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 
-const inter = Inter({ subsets: ["latin"] });
+const dmSans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 
 export const metadata: Metadata = {
-  title: "SEVE Emploi - Module Prospection",
-  description: "Outil de suivi de la prospection entreprises - Médiation Active",
+  title: "AGK · Prospection SEVE",
+  description: "Module Prospection entreprises - An Grèn Kouler - Médiation Active",
 };
 
 export default function RootLayout({
@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className={inter.className}>
+      <body className={dmSans.className}>
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -42,8 +42,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary-900">SEVE EMPLOI</h1>
-          <p className="mt-2 text-primary-600">Module de prospection</p>
+          <span className="text-4xl">🌿</span>
+          <h1 className="text-3xl font-bold text-primary-900 mt-2">An Grèn Kouler</h1>
+          <p className="mt-1 text-primary-600">Prospection SEVE</p>
         </div>
 
         <div className="card p-8">
@@ -107,7 +108,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-4 text-center text-xs text-gray-500">
-          Médiation Active &mdash; SEVE Emploi v3.0
+          An Grèn Kouler &mdash; Médiation Active · La Réunion
         </p>
       </div>
     </div>
