@@ -18,7 +18,7 @@ interface BeneficiaryResult {
   firstName: string;
   lastName: string;
   targetJob: string;
-  city: string;
+  ville: string;
   _count: { prospections: number };
 }
 
@@ -188,9 +188,9 @@ export default function RecherchePage() {
                         <Briefcase className="h-3 w-3" /> {b.targetJob}
                       </span>
                     )}
-                    {b.city && (
+                    {b.ville && (
                       <span className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" /> {b.city}
+                        <MapPin className="h-3 w-3" /> {b.ville}
                       </span>
                     )}
                     {b._count.prospections > 0 && (

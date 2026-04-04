@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
             { firstName: { contains: q, mode: "insensitive" } },
             { lastName: { contains: q, mode: "insensitive" } },
             { targetJob: { contains: q, mode: "insensitive" } },
-            { city: { contains: q, mode: "insensitive" } },
+            { ville: { contains: q, mode: "insensitive" } },
           ],
         },
         select: {
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
           firstName: true,
           lastName: true,
           targetJob: true,
-          city: true,
+          ville: true,
           _count: { select: { prospections: true } },
         },
         take: 20,
