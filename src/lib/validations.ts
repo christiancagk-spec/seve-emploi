@@ -73,4 +73,6 @@ export const loginSchema = z.object({
 export type CreateCompanyInput = z.infer<typeof createCompanySchema>;
 export type UpdateCompanyInput = z.infer<typeof updateCompanySchema>;
 export type CreateContactInput = z.infer<typeof createContactSchema>;
-export type CreateBeneficiaryInput = z.infer<typeof createBeneficiarySchema
+export type CreateBeneficiaryInput = z.infer<typeof createBeneficiarySchema>;
+export type CreateReminderInput = z.infer<typeof createReminderSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
