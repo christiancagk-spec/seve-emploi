@@ -25,6 +25,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Install OpenSSL for Prisma engine compatibility
+RUN apk add --no-cache openssl openssl-dev
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
@@ -37,12 +40,13 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 
 # Script de démarrage : migration DB + lancement serveur
-RUN printf '#!/bin/sh\nnpx prisma db push --skip-generate\nnode server.js\n' > /app/start.sh && chmod +x /app/start.sh
+# Use node directly to run prisma CLI (npx not available in standalone)
+RUN printf '#!/bin/sh\nnode /app/node_modules/prisma/build/index.js db push --skip-generate\nnode server.js\n' > /app/start.sh && chmod +x /app/start.sh
 
 USER nextjs
 
 EXPOSE 3000
 ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
+ENV HOSTNAME="0.0.0.0"
 
-CMD ["sh", "/app/start.sh"]
+CMD ["/app/start.sh"]
