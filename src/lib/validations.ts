@@ -50,6 +50,53 @@ export const createBeneficiarySchema = z.object({
 });
 
 // ============================================================
+// PROSPECTIONS (liaison salarié/entreprise)
+// ============================================================
+
+export const createProspectionSchema = z.object({
+  companyId: z.string().min(1),
+  beneficiaryId: z.coerce.number().int(),
+  status: z
+    .enum(["EN_COURS", "PMSMP", "CONTRAT", "REFUS", "TERMINE"])
+    .default("EN_COURS"),
+  placementType: z
+    .enum(["PMSMP", "STAGE", "CDD", "CDI", "APPRENTISSAGE", "INTERIM", "AUTRE"])
+    .default("PMSMP"),
+  startDate: z
+    .string()
+    .or(z.date())
+    .transform((v) => new Date(v))
+    .optional(),
+  endDate: z
+    .string()
+    .or(z.date())
+    .transform((v) => new Date(v))
+    .optional()
+    .nullable(),
+  notes: z.string().max(5000).default(""),
+});
+
+export const updateProspectionSchema = z.object({
+  status: z.enum(["EN_COURS", "PMSMP", "CONTRAT", "REFUS", "TERMINE"]).optional(),
+  placementType: z
+    .enum(["PMSMP", "STAGE", "CDD", "CDI", "APPRENTISSAGE", "INTERIM", "AUTRE"])
+    .optional(),
+  startDate: z
+    .string()
+    .or(z.date())
+    .transform((v) => new Date(v))
+    .optional(),
+  endDate: z
+    .string()
+    .or(z.date())
+    .transform((v) => new Date(v))
+    .optional()
+    .nullable(),
+  notes: z.string().max(5000).optional(),
+  outcome: z.string().max(2000).optional(),
+});
+
+// ============================================================
 // RAPPELS
 // ============================================================
 
@@ -75,4 +122,6 @@ export type UpdateCompanyInput = z.infer<typeof updateCompanySchema>;
 export type CreateContactInput = z.infer<typeof createContactSchema>;
 export type CreateBeneficiaryInput = z.infer<typeof createBeneficiarySchema>;
 export type CreateReminderInput = z.infer<typeof createReminderSchema>;
+export type CreateProspectionInput = z.infer<typeof createProspectionSchema>;
+export type UpdateProspectionInput = z.infer<typeof updateProspectionSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;

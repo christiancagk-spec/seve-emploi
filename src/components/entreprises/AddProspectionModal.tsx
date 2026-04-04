@@ -1,18 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Save, Building2 } from "lucide-react";
+import { X, Save, Users } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface Props {
-  beneficiaryId: string;
-  beneficiaryName: string;
+  companyId: string;
+  companyName: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-const placementTypeOptions = [
-  { value: "PMSMP", label: "PMSMP (immersion)" },
+const placementOptions = [
+  { value: "PMSMP", label: "PMSMP (immersion professionnelle)" },
   { value: "STAGE", label: "Stage" },
   { value: "CDD", label: "CDD" },
   { value: "CDI", label: "CDI" },
@@ -23,20 +23,23 @@ const placementTypeOptions = [
 
 const statusOptions = [
   { value: "EN_COURS", label: "En cours" },
-  { value: "PMSMP", label: "PMSMP (immersion)" },
-  { value: "CONTRAT", label: "Contrat" },
-  { value: "REFUS", label: "Refusé" },
   { value: "TERMINE", label: "Terminé" },
+  { value: "REFUS", label: "Refusé" },
 ];
 
-export default function ProspectionFormModal({ beneficiaryId, beneficiaryName, onClose, onSuccess }: Props) {
-  const [companies, setCompanies] = useState<any[]>([]);
-  const [loadingCompanies, setLoadingCompanies] = useState(true);
+export default function AddProspectionModal({
+  companyId,
+  companyName,
+  onClose,
+  onSuccess,
+}: Props) {
+  const [beneficiaries, setBeneficiaries] = useState<any[]>([]);
+  const [loadingBenef, setLoadingBenef] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [search, setSearch] = useState("");
 
   const [form, setForm] = useState({
-    companyId: "",
+    beneficiaryId: "",
     placementType: "PMSMP",
     status: "EN_COURS",
     startDate: new Date().toISOString().split("T")[0],
@@ -45,27 +48,22 @@ export default function ProspectionFormModal({ beneficiaryId, beneficiaryName, o
   });
 
   useEffect(() => {
-    fetch("/api/entreprises")
+    fetch("/api/beneficiaires")
       .then((res) => res.json())
-      .then((data) => {
-        setCompanies(data.companies || []);
-      })
-      .catch(() => toast.error("Erreur chargement entreprises"))
-      .finally(() => setLoadingCompanies(false));
+      .then((data) => setBeneficiaries(data || []))
+      .catch(() => toast.error("Erreur chargement salariés"))
+      .finally(() => setLoadingBenef(false));
   }, []);
 
-  const filteredCompanies = searchTerm
-    ? companies.filter(
-        (c) =>
-          c.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          c.city?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : companies;
+  const filteredBenef = beneficiaries.filter((b) => {
+    const fullName = `${b.firstName || ""} ${b.lastName || ""}`.toLowerCase();
+    return fullName.includes(search.toLowerCase());
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.companyId) {
-      toast.error("Sélectionnez une entreprise");
+    if (!form.beneficiaryId) {
+      toast.error("Sélectionnez un salarié");
       return;
     }
     setSubmitting(true);
@@ -75,13 +73,18 @@ export default function ProspectionFormModal({ beneficiaryId, beneficiaryName, o
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...form,
-          beneficiaryId,
+          companyId,
+          beneficiaryId: parseInt(form.beneficiaryId),
+          placementType: form.placementType,
+          status: form.status,
+          startDate: form.startDate,
+          endDate: form.endDate || undefined,
+          notes: form.notes,
         }),
       });
 
       if (res.ok) {
-        toast.success("Placement ajouté avec succès");
+        toast.success("Salarié associé à l'entreprise");
         onSuccess();
       } else {
         const data = await res.json();
@@ -99,8 +102,8 @@ export default function ProspectionFormModal({ beneficiaryId, beneficiaryName, o
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-primary-500" />
-            Associer à une entreprise
+            <Users className="h-5 w-5 text-primary-500" />
+            Associer un salarié
           </h2>
           <button
             onClick={onClose}
@@ -113,61 +116,58 @@ export default function ProspectionFormModal({ beneficiaryId, beneficiaryName, o
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="bg-primary-50 rounded-lg p-3">
             <p className="text-sm text-primary-700">
-              <span className="font-medium">Salarié en transition :</span> {beneficiaryName}
+              <span className="font-medium">Entreprise :</span> {companyName}
             </p>
           </div>
 
-          {/* Entreprise avec recherche */}
+          {/* Sélection du salarié avec recherche */}
           <div>
-            <label className="label">Entreprise *</label>
-            {loadingCompanies ? (
+            <label className="label">Salarié en transition *</label>
+            <input
+              type="text"
+              className="input mb-2"
+              placeholder="Rechercher un salarié..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {loadingBenef ? (
               <p className="text-sm text-gray-400">Chargement...</p>
             ) : (
-              <>
-                <input
-                  type="text"
-                  placeholder="Rechercher une entreprise..."
-                  className="input mb-2"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <select
-                  className="input"
-                  value={form.companyId}
-                  onChange={(e) => setForm({ ...form, companyId: e.target.value })}
-                  required
-                  size={Math.min(filteredCompanies.length + 1, 6)}
-                >
-                  <option value="">-- Sélectionner --</option>
-                  {filteredCompanies.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.companyName} — {c.city || "Ville non renseignée"}
-                    </option>
-                  ))}
-                </select>
-              </>
+              <select
+                className="input"
+                value={form.beneficiaryId}
+                onChange={(e) =>
+                  setForm({ ...form, beneficiaryId: e.target.value })
+                }
+                required
+                size={5}
+              >
+                {filteredBenef.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.lastName} {b.firstName}
+                    {b.targetJob ? ` — ${b.targetJob}` : ""}
+                  </option>
+                ))}
+              </select>
             )}
           </div>
 
           {/* Type de placement */}
           <div>
             <label className="label">Type de placement *</label>
-            <div className="flex flex-wrap gap-2">
-              {placementTypeOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setForm({ ...form, placementType: opt.value })}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                    form.placementType === opt.value
-                      ? "bg-primary-600 text-white border-primary-600"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-primary-400"
-                  }`}
-                >
+            <select
+              className="input"
+              value={form.placementType}
+              onChange={(e) =>
+                setForm({ ...form, placementType: e.target.value })
+              }
+            >
+              {placementOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
                   {opt.label}
-                </button>
+                </option>
               ))}
-            </div>
+            </select>
           </div>
 
           {/* Statut */}
@@ -194,7 +194,9 @@ export default function ProspectionFormModal({ beneficiaryId, beneficiaryName, o
                 type="date"
                 className="input"
                 value={form.startDate}
-                onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, startDate: e.target.value })
+                }
               />
             </div>
             <div>
@@ -214,7 +216,7 @@ export default function ProspectionFormModal({ beneficiaryId, beneficiaryName, o
             <textarea
               className="input"
               rows={3}
-              placeholder="Observations, résultat du placement..."
+              placeholder="Observations, objectifs du placement..."
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
             />
@@ -226,7 +228,7 @@ export default function ProspectionFormModal({ beneficiaryId, beneficiaryName, o
             </button>
             <button type="submit" disabled={submitting} className="btn-primary">
               <Save className="h-4 w-4 mr-2" />
-              {submitting ? "Enregistrement..." : "Ajouter"}
+              {submitting ? "Enregistrement..." : "Associer"}
             </button>
           </div>
         </form>

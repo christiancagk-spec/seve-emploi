@@ -192,9 +192,20 @@ enum ProspectionStatus {
   TERMINE
 }
 
+enum PlacementType {
+  PMSMP
+  STAGE
+  CDD
+  CDI
+  APPRENTISSAGE
+  INTERIM
+  AUTRE
+}
+
 model Prospection {
   id            String            @id @default(cuid())
   status        ProspectionStatus @default(EN_COURS)
+  placementType PlacementType     @default(PMSMP)
   startDate     DateTime          @default(now())
   endDate       DateTime?
   notes         String            @default("")

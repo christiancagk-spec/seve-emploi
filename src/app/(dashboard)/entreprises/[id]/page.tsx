@@ -14,10 +14,51 @@ import {
   Clock,
   FileText,
   User,
+  Plus,
+  Filter,
+  ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import CompanyFormModal from "@/components/entreprises/CompanyFormModal";
+import AddProspectionModal from "@/components/entreprises/AddProspectionModal";
+
+// Labels & styles
+const placementTypeLabel: Record<string, string> = {
+  PMSMP: "PMSMP",
+  STAGE: "Stage",
+  CDD: "CDD",
+  CDI: "CDI",
+  APPRENTISSAGE: "Apprentissage",
+  INTERIM: "Intérim",
+  AUTRE: "Autre",
+};
+
+const placementTypeClass: Record<string, string> = {
+  PMSMP: "bg-blue-100 text-blue-700",
+  STAGE: "bg-purple-100 text-purple-700",
+  CDD: "bg-orange-100 text-orange-700",
+  CDI: "bg-green-100 text-green-700",
+  APPRENTISSAGE: "bg-teal-100 text-teal-700",
+  INTERIM: "bg-yellow-100 text-yellow-700",
+  AUTRE: "bg-gray-100 text-gray-700",
+};
+
+const prospectionStatusLabel: Record<string, string> = {
+  EN_COURS: "En cours",
+  PMSMP: "PMSMP",
+  CONTRAT: "Contrat",
+  REFUS: "Refusé",
+  TERMINE: "Terminé",
+};
+
+const prospectionStatusClass: Record<string, string> = {
+  EN_COURS: "bg-blue-50 text-blue-700 border-blue-200",
+  PMSMP: "bg-indigo-50 text-indigo-700 border-indigo-200",
+  CONTRAT: "bg-green-50 text-green-700 border-green-200",
+  REFUS: "bg-red-50 text-red-700 border-red-200",
+  TERMINE: "bg-gray-50 text-gray-700 border-gray-200",
+};
 
 export default function CompanyDetailPage() {
   const params = useParams();
@@ -25,6 +66,9 @@ export default function CompanyDetailPage() {
   const [company, setCompany] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isAddProspOpen, setIsAddProspOpen] = useState(false);
+  const [filterType, setFilterType] = useState<string>("TOUS");
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const fetchCompany = async () => {
     try {
@@ -52,6 +96,33 @@ export default function CompanyDetailPage() {
     fetchCompany();
   };
 
+  const handleProspectionAdded = () => {
+    setIsAddProspOpen(false);
+    fetchCompany();
+  };
+
+  // Quick status change
+  const handleStatusChange = async (prospectionId: string, newStatus: string) => {
+    setUpdatingId(prospectionId);
+    try {
+      const res = await fetch("/api/prospections", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: prospectionId, status: newStatus }),
+      });
+      if (res.ok) {
+        toast.success("Statut mis à jour");
+        fetchCompany();
+      } else {
+        toast.error("Erreur de mise à jour");
+      }
+    } catch {
+      toast.error("Erreur réseau");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   const statusLabel: Record<string, string> = {
     EN_ATTENTE: "En attente",
     PMSMP: "PMSMP",
@@ -66,13 +137,18 @@ export default function CompanyDetailPage() {
     REFUS: "badge badge-refus",
   };
 
-  const prospectionStatusLabel: Record<string, string> = {
-    EN_COURS: "En cours",
-    PMSMP: "PMSMP",
-    CONTRAT: "Contrat",
-    REFUS: "Refus",
-    TERMINE: "Terminé",
-  };
+  // Compute placement type counters
+  const prospections = company?.prospections || [];
+  const typeCounts: Record<string, number> = {};
+  prospections.forEach((p: any) => {
+    const t = p.placementType || "AUTRE";
+    typeCounts[t] = (typeCounts[t] || 0) + 1;
+  });
+
+  const filteredProspections =
+    filterType === "TOUS"
+      ? prospections
+      : prospections.filter((p: any) => p.placementType === filterType);
 
   if (loading) {
     return (
@@ -177,7 +253,7 @@ export default function CompanyDetailPage() {
               <p className="text-xs text-gray-500">Interactions</p>
             </div>
             <div>
-              <p className="text-lg font-bold text-green-600">{company.prospections?.length || 0}</p>
+              <p className="text-lg font-bold text-green-600">{prospections.length}</p>
               <p className="text-xs text-gray-500">Prospections</p>
             </div>
             <div>
@@ -187,6 +263,29 @@ export default function CompanyDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Placement type counters */}
+      {prospections.length > 0 && (
+        <div className="card p-5">
+          <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            Répartition par type de placement
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(typeCounts).map(([type, count]) => (
+              <span
+                key={type}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${placementTypeClass[type] || "bg-gray-100 text-gray-700"}`}
+              >
+                {placementTypeLabel[type] || type}
+                <span className="bg-white/60 rounded-full px-1.5 py-0.5 text-[10px] font-bold">
+                  {count}
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Notes */}
       {company.notes && (
@@ -203,41 +302,108 @@ export default function CompanyDetailPage() {
         {/* Prospections / Salariés en transition */}
         <div className="card">
           <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary-500" />
-              Salariés en transition accueillis (stages / immersions)
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary-500" />
+                Salariés en transition
+              </h2>
+              <button
+                onClick={() => setIsAddProspOpen(true)}
+                className="btn-primary text-sm py-1.5 px-3"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Associer
+              </button>
+            </div>
+
+            {/* Filter pills */}
+            {prospections.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                <button
+                  onClick={() => setFilterType("TOUS")}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                    filterType === "TOUS"
+                      ? "bg-gray-900 text-white border-gray-900"
+                      : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                  }`}
+                >
+                  Tous ({prospections.length})
+                </button>
+                {Object.entries(typeCounts).map(([type, count]) => (
+                  <button
+                    key={type}
+                    onClick={() => setFilterType(type)}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                      filterType === type
+                        ? "bg-gray-900 text-white border-gray-900"
+                        : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                    }`}
+                  >
+                    {placementTypeLabel[type] || type} ({count})
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+
           <div className="divide-y divide-gray-50">
-            {company.prospections && company.prospections.length > 0 ? (
-              company.prospections.map((p: any) => (
+            {filteredProspections.length > 0 ? (
+              filteredProspections.map((p: any) => (
                 <div key={p.id} className="px-6 py-4 hover:bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {p.beneficiary?.firstName} {p.beneficiary?.lastName}
-                      </p>
-                      <p className="text-xs text-gray-500">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-medium text-gray-900">
+                          {p.beneficiary?.firstName} {p.beneficiary?.lastName}
+                        </p>
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${
+                            placementTypeClass[p.placementType] || "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {placementTypeLabel[p.placementType] || p.placementType}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5">
                         {p.beneficiary?.targetJob || "Poste non renseigné"}
                       </p>
                       <p className="text-xs text-gray-400 mt-0.5">
                         Depuis le {new Date(p.startDate).toLocaleDateString("fr-FR")}
-                        {p.endDate && ` jusqu'au ${new Date(p.endDate).toLocaleDateString("fr-FR")}`}
+                        {p.endDate && ` → ${new Date(p.endDate).toLocaleDateString("fr-FR")}`}
                       </p>
                     </div>
-                    <span className={statusClass[p.status] || "badge badge-attente"}>
-                      {prospectionStatusLabel[p.status] || p.status}
-                    </span>
+
+                    {/* Quick status selector */}
+                    <div className="flex-shrink-0">
+                      <select
+                        value={p.status}
+                        onChange={(e) => handleStatusChange(p.id, e.target.value)}
+                        disabled={updatingId === p.id}
+                        className={`text-xs rounded-lg border px-2 py-1.5 cursor-pointer focus:ring-2 focus:ring-primary-500 ${
+                          prospectionStatusClass[p.status] || "bg-gray-50 text-gray-700 border-gray-200"
+                        } ${updatingId === p.id ? "opacity-50" : ""}`}
+                      >
+                        {Object.entries(prospectionStatusLabel).map(([val, label]) => (
+                          <option key={val} value={val}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                   {p.notes && (
-                    <p className="text-xs text-gray-500 mt-1 italic">{p.notes}</p>
+                    <p className="text-xs text-gray-500 mt-1.5 italic">{p.notes}</p>
                   )}
                 </div>
               ))
             ) : (
               <div className="p-6 text-center text-gray-400">
                 <Users className="h-8 w-8 mx-auto mb-2" />
-                <p>Aucun salarié en transition accueilli pour le moment</p>
+                <p>
+                  {filterType === "TOUS"
+                    ? "Aucun salarié en transition accueilli pour le moment"
+                    : `Aucun salarié en ${placementTypeLabel[filterType] || filterType}`}
+                </p>
               </div>
             )}
           </div>
@@ -308,12 +474,21 @@ export default function CompanyDetailPage() {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Modals */}
       {isFormOpen && (
         <CompanyFormModal
           company={company}
           onClose={() => setIsFormOpen(false)}
           onSuccess={handleEditSuccess}
+        />
+      )}
+
+      {isAddProspOpen && (
+        <AddProspectionModal
+          companyId={company.id}
+          companyName={company.companyName}
+          onClose={() => setIsAddProspOpen(false)}
+          onSuccess={handleProspectionAdded}
         />
       )}
     </div>

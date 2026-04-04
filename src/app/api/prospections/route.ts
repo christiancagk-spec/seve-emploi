@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, unauthorized } from "@/lib/auth-helpers";
-import { z } from "zod";
+import {
+  createProspectionSchema,
+  updateProspectionSchema,
+} from "@/lib/validations";
 
-const createProspectionSchema = z.object({
-  companyId: z.string().min(1, "Entreprise requise"),
-  beneficiaryId: z.coerce.number().int().min(1, "Salarié en transition requis"),
-  status: z.enum(["EN_COURS", "PMSMP", "CONTRAT", "REFUS", "TERMINE"]).default("EN_COURS"),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  notes: z.string().optional(),
-});
-
-// POST /api/prospections
+// POST /api/prospections — Créer une prospection (liaison salarié/entreprise)
 export async function POST(request: NextRequest) {
   const user = await requireAuth();
   if (!user) return unauthorized();
@@ -26,13 +20,18 @@ export async function POST(request: NextRequest) {
         companyId: data.companyId,
         beneficiaryId: data.beneficiaryId,
         status: data.status,
-        startDate: data.startDate ? new Date(data.startDate) : new Date(),
-        endDate: data.endDate ? new Date(data.endDate) : undefined,
+        placementType: data.placementType,
+        startDate: data.startDate || new Date(),
+        endDate: data.endDate || undefined,
         notes: data.notes || "",
       },
       include: {
-        company: { select: { id: true, companyName: true, city: true, sector: true } },
-        beneficiary: { select: { id: true, firstName: true, lastName: true } },
+        company: {
+          select: { id: true, companyName: true, city: true, sector: true },
+        },
+        beneficiary: {
+          select: { id: true, firstName: true, lastName: true, targetJob: true },
+        },
       },
     });
 
@@ -44,8 +43,56 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    console.error("Error creating prospection:", error);
     return NextResponse.json(
       { error: "Erreur lors de la création" },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH /api/prospections — Modifier une prospection (statut, type, dates)
+export async function PATCH(request: NextRequest) {
+  const user = await requireAuth();
+  if (!user) return unauthorized();
+
+  try {
+    const body = await request.json();
+    const { id, ...updateData } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID de prospection requis" },
+        { status: 400 }
+      );
+    }
+
+    const data = updateProspectionSchema.parse(updateData);
+
+    const prospection = await prisma.prospection.update({
+      where: { id },
+      data,
+      include: {
+        company: {
+          select: { id: true, companyName: true, city: true, sector: true },
+        },
+        beneficiary: {
+          select: { id: true, firstName: true, lastName: true, targetJob: true },
+        },
+      },
+    });
+
+    return NextResponse.json(prospection);
+  } catch (error: any) {
+    if (error.name === "ZodError") {
+      return NextResponse.json(
+        { error: "Données invalides", details: error.errors },
+        { status: 400 }
+      );
+    }
+    console.error("Error updating prospection:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la mise à jour" },
       { status: 500 }
     );
   }
