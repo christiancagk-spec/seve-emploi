@@ -168,12 +168,12 @@ export default function BeneficiaryDetailPage() {
                 <Mail className="h-4 w-4 text-gray-400" /> {beneficiary.email}
               </p>
             )}
-            {beneficiary.city && (
+            {beneficiary.ville && (
               <p className="flex items-center gap-2 text-sm text-gray-700">
-                <MapPin className="h-4 w-4 text-gray-400" /> {beneficiary.city}
+                <MapPin className="h-4 w-4 text-gray-400" /> {beneficiary.ville}
               </p>
             )}
-            {!beneficiary.phone && !beneficiary.email && !beneficiary.city && (
+            {!beneficiary.phone && !beneficiary.email && !beneficiary.ville && (
               <p className="text-sm text-gray-400 italic">Aucune info renseignée</p>
             )}
           </div>

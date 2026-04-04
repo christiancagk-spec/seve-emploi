@@ -386,9 +386,12 @@ export default function CompanyDetailPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-medium text-gray-900">
+                        <Link
+                          href={`/beneficiaires/${p.beneficiary?.id}`}
+                          className="text-sm font-medium text-gray-900 hover:text-primary-600 hover:underline"
+                        >
                           {p.beneficiary?.firstName} {p.beneficiary?.lastName}
-                        </p>
+                        </Link>
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${
                             placementTypeClass[p.placementType] || "bg-gray-100 text-gray-700"
