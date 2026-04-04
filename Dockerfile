@@ -25,8 +25,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Install OpenSSL for Prisma engine compatibility
-RUN apk add --no-cache openssl openssl-dev
+# Install OpenSSL + PostgreSQL client for Prisma engine and SQL init
+RUN apk add --no-cache openssl openssl-dev postgresql-client
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -39,9 +39,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modul
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
 
-# Script de démarrage : migration DB + lancement serveur
-# Use node directly to run prisma CLI (npx not available in standalone)
-RUN printf '#!/bin/sh\nnode /app/node_modules/prisma/build/index.js db push --skip-generate\nnode server.js\n' > /app/start.sh && chmod +x /app/start.sh
+# Script de démarrage : init tables SEVE via SQL + lancement serveur
+# Utilise psql avec CREATE TABLE IF NOT EXISTS (sûr pour base partagée)
+RUN printf '#!/bin/sh\necho "Running SEVE table init..."\npsql "$DATABASE_URL" -f /app/prisma/init-seve-tables.sql 2>&1 || echo "SQL init warning (non-fatal)"\necho "Starting Next.js..."\nnode server.js\n' > /app/start.sh && chmod +x /app/start.sh
 
 USER nextjs
 
