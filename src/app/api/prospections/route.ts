@@ -6,6 +6,28 @@ import {
   updateProspectionSchema,
 } from "@/lib/validations";
 
+// GET /api/prospections — Liste toutes les prospections (pour stats dashboard)
+export async function GET(request: NextRequest) {
+  const user = await requireAuth();
+  if (!user) return unauthorized();
+
+  try {
+    const prospections = await prisma.prospection.findMany({
+      select: {
+        id: true,
+        status: true,
+        placementType: true,
+        startDate: true,
+        endDate: true,
+      },
+    });
+    return NextResponse.json(prospections);
+  } catch (error) {
+    console.error("Error fetching prospections:", error);
+    return NextResponse.json([], { status: 200 });
+  }
+}
+
 // POST /api/prospections — Créer une prospection (liaison salarié/entreprise)
 export async function POST(request: NextRequest) {
   const user = await requireAuth();

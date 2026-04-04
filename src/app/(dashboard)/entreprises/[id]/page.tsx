@@ -17,12 +17,14 @@ import {
   Plus,
   Filter,
   ChevronDown,
+  Check,
 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import CompanyFormModal from "@/components/entreprises/CompanyFormModal";
 import AddProspectionModal from "@/components/entreprises/AddProspectionModal";
 import AddReminderModal from "@/components/entreprises/AddReminderModal";
+import AddContactModal from "@/components/entreprises/AddContactModal";
 
 // Labels & styles
 const placementTypeLabel: Record<string, string> = {
@@ -69,6 +71,7 @@ export default function CompanyDetailPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAddProspOpen, setIsAddProspOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
   const [filterType, setFilterType] = useState<string>("TOUS");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
@@ -106,6 +109,29 @@ export default function CompanyDetailPage() {
   const handleReminderAdded = () => {
     setIsReminderOpen(false);
     fetchCompany();
+  };
+
+  const handleContactAdded = () => {
+    setIsContactOpen(false);
+    fetchCompany();
+  };
+
+  const handleDismissReminder = async (reminderId: string) => {
+    try {
+      const res = await fetch("/api/rappels", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: reminderId, status: "TERMINE" }),
+      });
+      if (res.ok) {
+        toast.success("Rappel terminé");
+        fetchCompany();
+      } else {
+        toast.error("Erreur");
+      }
+    } catch {
+      toast.error("Erreur réseau");
+    }
   };
 
   // Quick status change
@@ -418,32 +444,60 @@ export default function CompanyDetailPage() {
 
         {/* Historique des interactions */}
         <div className="card">
-          <div className="px-6 py-4 border-b border-gray-100">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Clock className="h-5 w-5 text-primary-500" />
-              Historique des interactions
+              Interactions
             </h2>
+            <button
+              onClick={() => setIsContactOpen(true)}
+              className="btn-primary text-sm py-1.5 px-3"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Interaction
+            </button>
           </div>
           <div className="divide-y divide-gray-50">
             {company.contacts && company.contacts.length > 0 ? (
-              company.contacts.map((c: any) => (
-                <div key={c.id} className="px-6 py-4 hover:bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{c.type}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{c.comment || "Pas de commentaire"}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-gray-400">
-                        {new Date(c.date).toLocaleDateString("fr-FR")}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {c.createdBy?.firstName} {c.createdBy?.lastName}
-                      </p>
+              company.contacts.map((c: any) => {
+                const typeIcon: Record<string, string> = { APPEL: "📞", EMAIL: "✉️", VISITE: "🏢", AUTRE: "📝" };
+                const outcomeClass: Record<string, string> = {
+                  POSITIF: "bg-green-100 text-green-700",
+                  EN_ATTENTE: "bg-yellow-100 text-yellow-700",
+                  NEGATIF: "bg-red-100 text-red-700",
+                };
+                const outcomeLabel: Record<string, string> = {
+                  POSITIF: "Positif",
+                  EN_ATTENTE: "En attente",
+                  NEGATIF: "Négatif",
+                };
+                return (
+                  <div key={c.id} className="px-6 py-4 hover:bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span>{typeIcon[c.type] || "📝"}</span>
+                          <p className="text-sm font-medium text-gray-900">{c.type}</p>
+                          {c.outcome && (
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${outcomeClass[c.outcome] || "bg-gray-100 text-gray-700"}`}>
+                              {outcomeLabel[c.outcome] || c.outcome}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-0.5">{c.comment || "Pas de commentaire"}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0 ml-4">
+                        <p className="text-xs text-gray-400">
+                          {new Date(c.date).toLocaleDateString("fr-FR")}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {c.createdBy?.firstName} {c.createdBy?.lastName}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="p-6 text-center text-gray-400">
                 <Clock className="h-8 w-8 mx-auto mb-2" />
@@ -495,9 +549,25 @@ export default function CompanyDetailPage() {
                       </div>
                       <p className="text-xs text-gray-500 mt-0.5">{r.comment || "Pas de commentaire"}</p>
                     </div>
-                    <p className={`text-xs whitespace-nowrap ml-4 ${isOverdue ? "text-red-500 font-medium" : "text-gray-400"}`}>
-                      {reminderDate.toLocaleDateString("fr-FR")}
-                    </p>
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                      <p className={`text-xs whitespace-nowrap ${isOverdue ? "text-red-500 font-medium" : "text-gray-400"}`}>
+                        {reminderDate.toLocaleDateString("fr-FR")}
+                      </p>
+                      {r.status !== "TERMINE" && (
+                        <button
+                          onClick={() => handleDismissReminder(r.id)}
+                          className="p-1 rounded-full text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors"
+                          title="Marquer comme fait"
+                        >
+                          <Check className="h-4 w-4" />
+                        </button>
+                      )}
+                      {r.status === "TERMINE" && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-medium">
+                          Fait
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
@@ -535,6 +605,15 @@ export default function CompanyDetailPage() {
           companyName={company.companyName}
           onClose={() => setIsReminderOpen(false)}
           onSuccess={handleReminderAdded}
+        />
+      )}
+
+      {isContactOpen && (
+        <AddContactModal
+          companyId={company.id}
+          companyName={company.companyName}
+          onClose={() => setIsContactOpen(false)}
+          onSuccess={handleContactAdded}
         />
       )}
     </div>

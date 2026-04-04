@@ -1,151 +1,208 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Filter, Building2, MapPin, Phone } from "lucide-react";
-import { SECTORS } from "@/lib/sectors";
-import toast from "react-hot-toast";
+import { useState, useCallback, useEffect } from "react";
+import { Search, Building2, User, MapPin, Briefcase, Users } from "lucide-react";
+import Link from "next/link";
+
+interface CompanyResult {
+  id: string;
+  companyName: string;
+  city: string;
+  sector: string;
+  contactStatus: string;
+  _count: { prospections: number };
+}
+
+interface BeneficiaryResult {
+  id: string;
+  firstName: string;
+  lastName: string;
+  targetJob: string;
+  city: string;
+  _count: { prospections: number };
+}
+
+const statusLabel: Record<string, string> = {
+  EN_ATTENTE: "En attente",
+  PMSMP: "PMSMP",
+  CONTRAT: "Contrat",
+  REFUS: "Refus",
+};
+
+const statusClass: Record<string, string> = {
+  EN_ATTENTE: "badge badge-attente",
+  PMSMP: "badge badge-pmsmp",
+  CONTRAT: "badge badge-contrat",
+  REFUS: "badge badge-refus",
+};
 
 export default function RecherchePage() {
-  const [results, setResults] = useState<any[]>([]);
+  const [query, setQuery] = useState("");
+  const [companies, setCompanies] = useState<CompanyResult[]>([]);
+  const [beneficiaries, setBeneficiaries] = useState<BeneficiaryResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  const [params, setParams] = useState({
-    search: "",
-    sector: "",
-    status: "",
-  });
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const doSearch = useCallback(async (q: string) => {
+    if (q.trim().length < 2) {
+      setCompanies([]);
+      setBeneficiaries([]);
+      setSearched(false);
+      return;
+    }
     setLoading(true);
-    setSearched(true);
-
     try {
-      const searchParams = new URLSearchParams();
-      if (params.search) searchParams.set("search", params.search);
-      if (params.sector) searchParams.set("sector", params.sector);
-      if (params.status) searchParams.set("status", params.status);
-      searchParams.set("limit", "100");
-
-      const res = await fetch(`/api/entreprises?${searchParams}`);
+      const res = await fetch(`/api/recherche?q=${encodeURIComponent(q)}`);
       const data = await res.json();
-      setResults(data.companies || []);
+      setCompanies(data.companies || []);
+      setBeneficiaries(data.beneficiaries || []);
+      setSearched(true);
     } catch {
-      toast.error("Erreur lors de la recherche");
+      setCompanies([]);
+      setBeneficiaries([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const statusLabel: Record<string, string> = {
-    EN_ATTENTE: "En attente",
-    PMSMP: "PMSMP",
-    CONTRAT: "Contrat",
-    REFUS: "Refus",
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => doSearch(query), 400);
+    return () => clearTimeout(timer);
+  }, [query, doSearch]);
 
-  const statusClass: Record<string, string> = {
-    EN_ATTENTE: "badge badge-attente",
-    PMSMP: "badge badge-pmsmp",
-    CONTRAT: "badge badge-contrat",
-    REFUS: "badge badge-refus",
-  };
+  const totalResults = companies.length + beneficiaries.length;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Recherche avancée</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Recherche</h1>
         <p className="text-gray-500 text-sm mt-1">
-          Recherchez des entreprises avec des filtres combinés
+          Recherchez parmi les entreprises et les salariés en transition
         </p>
       </div>
 
-      <div className="card p-6">
-        <form onSubmit={handleSearch} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="label">Recherche texte</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  className="input pl-10"
-                  placeholder="Nom, ville, téléphone..."
-                  value={params.search}
-                  onChange={(e) => setParams({ ...params, search: e.target.value })}
-                />
-              </div>
-            </div>
-            <div>
-              <label className="label">Secteur</label>
-              <select
-                className="input"
-                value={params.sector}
-                onChange={(e) => setParams({ ...params, sector: e.target.value })}
-              >
-                <option value="">Tous les secteurs</option>
-                {SECTORS.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="label">Statut</label>
-              <select
-                className="input"
-                value={params.status}
-                onChange={(e) => setParams({ ...params, status: e.target.value })}
-              >
-                <option value="">Tous les statuts</option>
-                <option value="EN_ATTENTE">En attente</option>
-                <option value="PMSMP">PMSMP</option>
-                <option value="CONTRAT">Contrat</option>
-                <option value="REFUS">Refus</option>
-              </select>
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <button type="submit" disabled={loading} className="btn-primary">
-              <Search className="h-4 w-4 mr-2" />
-              {loading ? "Recherche..." : "Rechercher"}
-            </button>
-          </div>
-        </form>
+      {/* Search bar */}
+      <div className="card p-4">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <input
+            type="text"
+            className="input pl-12 text-lg py-3"
+            placeholder="Nom, ville, secteur, métier..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            autoFocus
+          />
+        </div>
+        {searched && (
+          <p className="text-sm text-gray-500 mt-2">
+            {totalResults} résultat{totalResults > 1 ? "s" : ""} pour « {query} »
+          </p>
+        )}
       </div>
 
-      {searched && (
+      {loading && (
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
+        </div>
+      )}
+
+      {!loading && searched && totalResults === 0 && (
+        <div className="card p-12 text-center">
+          <Search className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-1">Aucun résultat</h3>
+          <p className="text-gray-500">Essayez avec d'autres termes de recherche</p>
+        </div>
+      )}
+
+      {/* Entreprises */}
+      {companies.length > 0 && (
         <div className="card">
           <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">
-              {results.length} résultat{results.length > 1 ? "s" : ""}
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-primary-500" />
+              Entreprises
+              <span className="text-sm font-normal text-gray-400">({companies.length})</span>
             </h2>
           </div>
-          {results.length === 0 ? (
-            <div className="p-12 text-center text-gray-400">
-              Aucun résultat pour ces critères
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-100">
-              {results.map((company: any) => (
-                <div key={company.id} className="px-6 py-4 hover:bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Building2 className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium text-gray-900">{company.companyName}</p>
-                        <p className="text-sm text-gray-500">
-                          {company.city} &middot; {company.sector}
-                        </p>
-                      </div>
-                    </div>
-                    <span className={statusClass[company.contactStatus] || "badge"}>
-                      {statusLabel[company.contactStatus] || company.contactStatus}
-                    </span>
-                  </div>
+          <div className="divide-y divide-gray-50">
+            {companies.map((c) => (
+              <Link
+                key={c.id}
+                href={`/entreprises/${c.id}`}
+                className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+              >
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{c.companyName}</p>
+                  <p className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                    {c.city && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" /> {c.city}
+                      </span>
+                    )}
+                    {c.sector && (
+                      <span className="flex items-center gap-1">
+                        <Briefcase className="h-3 w-3" /> {c.sector}
+                      </span>
+                    )}
+                    {c._count.prospections > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Users className="h-3 w-3" /> {c._count.prospections} placement{c._count.prospections > 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </p>
                 </div>
-              ))}
-            </div>
-          )}
+                <span className={statusClass[c.contactStatus] || "badge"}>
+                  {statusLabel[c.contactStatus] || c.contactStatus}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Bénéficiaires */}
+      {beneficiaries.length > 0 && (
+        <div className="card">
+          <div className="px-6 py-4 border-b border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <User className="h-5 w-5 text-green-500" />
+              Salariés en transition
+              <span className="text-sm font-normal text-gray-400">({beneficiaries.length})</span>
+            </h2>
+          </div>
+          <div className="divide-y divide-gray-50">
+            {beneficiaries.map((b) => (
+              <Link
+                key={b.id}
+                href={`/beneficiaires/${b.id}`}
+                className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+              >
+                <div>
+                  <p className="text-sm font-medium text-gray-900">
+                    {b.firstName} {b.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                    {b.targetJob && (
+                      <span className="flex items-center gap-1">
+                        <Briefcase className="h-3 w-3" /> {b.targetJob}
+                      </span>
+                    )}
+                    {b.city && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" /> {b.city}
+                      </span>
+                    )}
+                    {b._count.prospections > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Users className="h-3 w-3" /> {b._count.prospections} placement{b._count.prospections > 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </div>

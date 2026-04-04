@@ -8,11 +8,14 @@ import {
   Calendar,
   TrendingUp,
   Bell,
-  AlertCircle,
   CheckCircle,
   ArrowRight,
+  Check,
+  Users,
+  Briefcase,
 } from "lucide-react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 interface Stats {
   total: number;
@@ -29,54 +32,120 @@ interface ReminderItem {
   company: { id: string; companyName: string; city: string };
 }
 
+interface PlacementStats {
+  total: number;
+  byType: Record<string, number>;
+  enCours: number;
+}
+
+const placementTypeLabel: Record<string, string> = {
+  PMSMP: "PMSMP",
+  STAGE: "Stage",
+  CDD: "CDD",
+  CDI: "CDI",
+  APPRENTISSAGE: "Apprentissage",
+  INTERIM: "Intérim",
+  AUTRE: "Autre",
+};
+
+const placementTypeColor: Record<string, string> = {
+  PMSMP: "bg-blue-100 text-blue-700",
+  STAGE: "bg-purple-100 text-purple-700",
+  CDD: "bg-orange-100 text-orange-700",
+  CDI: "bg-green-100 text-green-700",
+  APPRENTISSAGE: "bg-teal-100 text-teal-700",
+  INTERIM: "bg-yellow-100 text-yellow-700",
+  AUTRE: "bg-gray-100 text-gray-700",
+};
+
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [stats, setStats] = useState<Stats>({ total: 0, enAttente: 0, pmsmp: 0, contrats: 0 });
+  const [placementStats, setPlacementStats] = useState<PlacementStats>({ total: 0, byType: {}, enCours: 0 });
   const [reminders, setReminders] = useState<ReminderItem[]>([]);
   const [recentCompanies, setRecentCompanies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dismissingId, setDismissingId] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    try {
+      const [companiesRes, remindersRes, prospectsRes] = await Promise.all([
+        fetch("/api/entreprises?limit=10"),
+        fetch("/api/rappels?status=EN_ATTENTE"),
+        fetch("/api/prospections"),
+      ]);
+
+      const companiesData = await companiesRes.json();
+      const remindersData = await remindersRes.json();
+
+      const companies = companiesData.companies || [];
+      setRecentCompanies(companies.slice(0, 5));
+      setReminders(Array.isArray(remindersData) ? remindersData.slice(0, 5) : []);
+
+      // Stats entreprises
+      const allRes = await fetch("/api/entreprises?limit=1000");
+      const allData = await allRes.json();
+      const all = allData.companies || [];
+
+      setStats({
+        total: allData.pagination?.total || all.length,
+        enAttente: all.filter((c: any) => c.contactStatus === "EN_ATTENTE").length,
+        pmsmp: all.filter((c: any) => c.contactStatus === "PMSMP").length,
+        contrats: all.filter((c: any) => c.contactStatus === "CONTRAT").length,
+      });
+
+      // Stats placements
+      if (prospectsRes.ok) {
+        const prospects = await prospectsRes.json();
+        const prospectArray = Array.isArray(prospects) ? prospects : [];
+        const byType: Record<string, number> = {};
+        let enCours = 0;
+        prospectArray.forEach((p: any) => {
+          const t = p.placementType || "AUTRE";
+          byType[t] = (byType[t] || 0) + 1;
+          if (p.status === "EN_COURS") enCours++;
+        });
+        setPlacementStats({ total: prospectArray.length, byType, enCours });
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const [companiesRes, remindersRes] = await Promise.all([
-          fetch("/api/entreprises?limit=10"),
-          fetch("/api/rappels?status=EN_ATTENTE"),
-        ]);
-
-        const companiesData = await companiesRes.json();
-        const remindersData = await remindersRes.json();
-
-        const companies = companiesData.companies || [];
-        setRecentCompanies(companies.slice(0, 5));
-        setReminders(Array.isArray(remindersData) ? remindersData.slice(0, 5) : []);
-
-        // Calculer les stats à partir des toutes les entreprises
-        const allRes = await fetch("/api/entreprises?limit=1000");
-        const allData = await allRes.json();
-        const all = allData.companies || [];
-
-        setStats({
-          total: allData.pagination?.total || all.length,
-          enAttente: all.filter((c: any) => c.contactStatus === "EN_ATTENTE").length,
-          pmsmp: all.filter((c: any) => c.contactStatus === "PMSMP").length,
-          contrats: all.filter((c: any) => c.contactStatus === "CONTRAT").length,
-        });
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchData();
   }, []);
 
+  const handleDismissReminder = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDismissingId(id);
+    try {
+      const res = await fetch("/api/rappels", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: "TERMINE" }),
+      });
+      if (res.ok) {
+        setReminders((prev) => prev.filter((r) => r.id !== id));
+        toast.success("Rappel terminé");
+      } else {
+        toast.error("Erreur");
+      }
+    } catch {
+      toast.error("Erreur réseau");
+    } finally {
+      setDismissingId(null);
+    }
+  };
+
   const statCards = [
-    { label: "Total entreprises", value: stats.total, icon: Building2, color: "bg-primary-500", bgColor: "bg-primary-50", textColor: "text-primary-600" },
-    { label: "En attente", value: stats.enAttente, icon: Clock, color: "bg-yellow-500", bgColor: "bg-yellow-50", textColor: "text-yellow-600" },
-    { label: "PMSMP", value: stats.pmsmp, icon: Calendar, color: "bg-green-500", bgColor: "bg-green-50", textColor: "text-green-600" },
-    { label: "Contrats", value: stats.contrats, icon: TrendingUp, color: "bg-blue-500", bgColor: "bg-blue-50", textColor: "text-blue-600" },
+    { label: "Entreprises", value: stats.total, icon: Building2, bgColor: "bg-primary-50", textColor: "text-primary-600" },
+    { label: "En attente", value: stats.enAttente, icon: Clock, bgColor: "bg-yellow-50", textColor: "text-yellow-600" },
+    { label: "Placements actifs", value: placementStats.enCours, icon: Users, bgColor: "bg-green-50", textColor: "text-green-600" },
+    { label: "Total placements", value: placementStats.total, icon: Briefcase, bgColor: "bg-blue-50", textColor: "text-blue-600" },
   ];
 
   const statusBadge = (status: string) => {
@@ -132,6 +201,27 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      {/* Placements par type */}
+      {placementStats.total > 0 && (
+        <div className="card p-5">
+          <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Placements par type
+          </h3>
+          <div className="flex flex-wrap gap-3">
+            {Object.entries(placementStats.byType).map(([type, count]) => (
+              <div
+                key={type}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${placementTypeColor[type] || "bg-gray-100 text-gray-700"}`}
+              >
+                <span className="text-sm font-medium">{placementTypeLabel[type] || type}</span>
+                <span className="text-lg font-bold">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Rappels */}
         <div className="card">
@@ -149,23 +239,39 @@ export default function DashboardPage() {
                 <p>Aucun rappel en attente</p>
               </div>
             ) : (
-              reminders.map((reminder) => (
-                <div key={reminder.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {reminder.company.companyName}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {reminder.comment}
-                      </p>
+              reminders.map((reminder) => {
+                const isOverdue = new Date(reminder.date) < new Date();
+                return (
+                  <div key={reminder.id} className={`px-6 py-4 hover:bg-gray-50 transition-colors ${isOverdue ? "bg-red-50/50" : ""}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <Link
+                        href={`/entreprises/${reminder.company.id}`}
+                        className="flex-1 min-w-0"
+                      >
+                        <p className="text-sm font-medium text-gray-900 hover:text-primary-600">
+                          {reminder.company.companyName}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5 truncate">
+                          {reminder.comment}
+                        </p>
+                      </Link>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className={`text-xs whitespace-nowrap ${isOverdue ? "text-red-500 font-medium" : "text-gray-400"}`}>
+                          {new Date(reminder.date).toLocaleDateString("fr-FR")}
+                        </span>
+                        <button
+                          onClick={(e) => handleDismissReminder(reminder.id, e)}
+                          disabled={dismissingId === reminder.id}
+                          className="p-1 rounded-full text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors"
+                          title="Marquer comme fait"
+                        >
+                          <Check className={`h-4 w-4 ${dismissingId === reminder.id ? "opacity-50" : ""}`} />
+                        </button>
+                      </div>
                     </div>
-                    <span className="text-xs text-gray-400 whitespace-nowrap ml-4">
-                      {new Date(reminder.date).toLocaleDateString("fr-FR")}
-                    </span>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
