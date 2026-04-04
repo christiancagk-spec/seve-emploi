@@ -56,8 +56,8 @@ model Beneficiary {
   codePostal        String?   @map("code_postal")
   situationAvant    String?   @map("situation_avant")
   niveauEtude       String?   @map("niveau_etude")
-  permis            String?
-  vehicule          String?
+  permis            Boolean?
+  vehicule          Boolean?
   siteAffectation   String?   @map("site_affectation")
   typeContrat       String?   @map("type_contrat")
   statut            String?
