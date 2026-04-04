@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Users, Plus, Search } from "lucide-react";
+import Link from "next/link";
 import toast from "react-hot-toast";
 
 export default function BeneficiairesPage() {
@@ -96,9 +97,10 @@ export default function BeneficiairesPage() {
       ) : (
         <div className="card divide-y divide-gray-100">
           {filtered.map((b: any) => (
-            <div
+            <Link
               key={b.id}
-              className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+              href={`/beneficiaires/${b.id}`}
+              className="block p-4 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -108,7 +110,7 @@ export default function BeneficiairesPage() {
                     </span>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">
+                    <p className="font-medium text-gray-900 hover:text-primary-600">
                       {b.firstName || ""} {b.lastName || ""}
                     </p>
                     <p className="text-sm text-gray-500">
@@ -120,7 +122,7 @@ export default function BeneficiairesPage() {
                   {b._count?.prospections || 0} entreprise(s)
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

@@ -211,9 +211,12 @@ export default function EntreprisesPage() {
                       <div className="flex items-center gap-3">
                         <Building2 className="h-5 w-5 text-gray-400 flex-shrink-0" />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <Link
+                            href={`/entreprises/${company.id}`}
+                            className="text-sm font-medium text-gray-900 hover:text-primary-600 hover:underline"
+                          >
                             {company.companyName}
-                          </p>
+                          </Link>
                           <p className="text-xs text-gray-500 flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
                             {company.city || "Non renseigné"}
@@ -266,7 +269,12 @@ export default function EntreprisesPage() {
               <div key={company.id} className="p-4 hover:bg-gray-50">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-medium text-gray-900">{company.companyName}</p>
+                    <Link
+                      href={`/entreprises/${company.id}`}
+                      className="font-medium text-gray-900 hover:text-primary-600 hover:underline"
+                    >
+                      {company.companyName}
+                    </Link>
                     <p className="text-sm text-gray-500 mt-0.5">{company.city} &middot; {company.sector}</p>
                     {company.phone && (
                       <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
