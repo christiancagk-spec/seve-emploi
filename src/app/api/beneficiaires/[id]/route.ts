@@ -81,8 +81,35 @@ export async function PATCH(
       );
     }
     return NextResponse.json(
-      { error: "Erreur lors de la mise à jour" },
+      { error: "Erreur serveur" },
       { status: 500 }
     );
   }
+}
+
+// DELETE /api/beneficiaires/:id
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const user = await requireAuth();
+  if (!user) return unauthorized();
+  if (user.role !== "ADMIN") return forbidden();
+
+  const id = parseInt(params.id, 10);
+  if (isNaN(id)) {
+    return NextResponse.json({ error: "ID invalide" }, { status: 400 });
+  }
+
+  const existing = await prisma.beneficiary.findUnique({
+    where: { id },
+  });
+
+  if (!existing) {
+    return NextResponse.json({ error: "Salarié en transition non trouvé" }, { status: 404 });
+  }
+
+  await prisma.beneficiary.delete({ where: { id } });
+
+  return NextResponse.json({ success: true });
 }

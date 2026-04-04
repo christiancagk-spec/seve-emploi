@@ -117,4 +117,13 @@ export default function BeneficiairesPage() {
                   </div>
                 </div>
                 <div className="text-sm text-gray-400">
-                  {b._count?.prospections || 0} entreprise(s)
+                  {b._count?.prospections || 0} entreprise(s)
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
