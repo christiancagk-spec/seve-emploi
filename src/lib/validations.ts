@@ -53,6 +53,9 @@ export const createBeneficiarySchema = z.object({
 // PROSPECTIONS (liaison salarié/entreprise)
 // ============================================================
 
+// Convertit les chaînes vides en undefined pour éviter Invalid Date
+const emptyToUndefined = (v: unknown) => (v === "" || v === null ? undefined : v);
+
 export const createProspectionSchema = z.object({
   companyId: z.string().min(1),
   beneficiaryId: z.coerce.number().int(),
@@ -62,17 +65,14 @@ export const createProspectionSchema = z.object({
   placementType: z
     .enum(["PMSMP", "STAGE", "CDD", "CDI", "APPRENTISSAGE", "INTERIM", "AUTRE"])
     .default("PMSMP"),
-  startDate: z
-    .string()
-    .or(z.date())
-    .transform((v) => new Date(v))
-    .optional(),
-  endDate: z
-    .string()
-    .or(z.date())
-    .transform((v) => new Date(v))
-    .optional()
-    .nullable(),
+  startDate: z.preprocess(
+    emptyToUndefined,
+    z.string().or(z.date()).transform((v) => new Date(v)).optional()
+  ),
+  endDate: z.preprocess(
+    emptyToUndefined,
+    z.string().or(z.date()).transform((v) => new Date(v)).optional().nullable()
+  ),
   notes: z.string().max(5000).default(""),
 });
 
@@ -81,17 +81,14 @@ export const updateProspectionSchema = z.object({
   placementType: z
     .enum(["PMSMP", "STAGE", "CDD", "CDI", "APPRENTISSAGE", "INTERIM", "AUTRE"])
     .optional(),
-  startDate: z
-    .string()
-    .or(z.date())
-    .transform((v) => new Date(v))
-    .optional(),
-  endDate: z
-    .string()
-    .or(z.date())
-    .transform((v) => new Date(v))
-    .optional()
-    .nullable(),
+  startDate: z.preprocess(
+    emptyToUndefined,
+    z.string().or(z.date()).transform((v) => new Date(v)).optional()
+  ),
+  endDate: z.preprocess(
+    emptyToUndefined,
+    z.string().or(z.date()).transform((v) => new Date(v)).optional().nullable()
+  ),
   notes: z.string().max(5000).optional(),
   outcome: z.string().max(2000).optional(),
 });
