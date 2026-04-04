@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         select: { status: true },
       },
     },
-    orderBy: { updatedAt: "desc" },
+    orderBy: { id: "desc" },
   });
 
   return NextResponse.json(beneficiaries);
