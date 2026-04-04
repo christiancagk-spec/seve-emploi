@@ -4,9 +4,9 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Seeding database...");
+  console.log("Seeding database (seve_users table)...");
 
-  // Créer l'admin par défaut
+  // Créer l'admin SEVE par défaut
   const adminPassword = await bcrypt.hash("admin123", 12);
   const admin = await prisma.user.upsert({
     where: { email: "admin@mediation-active.re" },
@@ -19,9 +19,9 @@ async function main() {
       role: Role.ADMIN,
     },
   });
-  console.log("Admin created:", admin.email);
+  console.log("Admin SEVE created:", admin.email);
 
-  // Créer un référent de test
+  // Créer un référent SEVE de test
   const referentPassword = await bcrypt.hash("referent123", 12);
   const referent = await prisma.user.upsert({
     where: { email: "referent@mediation-active.re" },
@@ -34,7 +34,7 @@ async function main() {
       role: Role.REFERENT,
     },
   });
-  console.log("Referent created:", referent.email);
+  console.log("Referent SEVE created:", referent.email);
 
   // Créer quelques entreprises de test
   const companies = [
@@ -91,32 +91,21 @@ async function main() {
   }
   console.log(`${companies.length} companies created`);
 
-  // Créer quelques bénéficiaires de test
-  const beneficiaries = [
-    { firstName: "Marie", lastName: "Dupont", targetJob: "Aide-soignante" },
-    { firstName: "Jean", lastName: "Martin", targetJob: "Maçon" },
-    { firstName: "Fatima", lastName: "Ali", targetJob: "Agent de propreté" },
-  ];
-
-  for (const b of beneficiaries) {
-    await prisma.beneficiary.create({
-      data: {
-        ...b,
-        supervisorId: referent.id,
-      },
-    });
-  }
-  console.log(`${beneficiaries.length} beneficiaries created`);
+  // NOTE: Les salariés en transition sont maintenant lus depuis la table
+  // beneficiaires partagée avec AGK App. Pas besoin de les créer ici.
+  console.log("Salariés en transition : lus depuis la base AGK partagée");
 
   console.log("\nSeed completed!");
-  console.log("\nComptes de test :");
+  console.log("\nComptes SEVE de test :");
   console.log("  Admin:    admin@mediation-active.re / admin123");
   console.log("  Référent: referent@mediation-active.re / referent123");
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("Seed error:", e);
     process.exit(1);
   })
-  .finally(() => prisma.$disconnect());
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

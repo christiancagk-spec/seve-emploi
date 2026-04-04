@@ -5,7 +5,7 @@ import { z } from "zod";
 
 const createProspectionSchema = z.object({
   companyId: z.string().min(1, "Entreprise requise"),
-  beneficiaryId: z.string().min(1, "Bénéficiaire requis"),
+  beneficiaryId: z.coerce.number().int().min(1, "Salarié en transition requis"),
   status: z.enum(["EN_COURS", "PMSMP", "CONTRAT", "REFUS", "TERMINE"]).default("EN_COURS"),
   startDate: z.string().optional(),
   endDate: z.string().optional(),

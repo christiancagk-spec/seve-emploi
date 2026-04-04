@@ -93,7 +93,7 @@ export default function ProspectionFormModal({ beneficiaryId, beneficiaryName, o
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="bg-primary-50 rounded-lg p-3">
             <p className="text-sm text-primary-700">
-              <span className="font-medium">Bénéficiaire :</span> {beneficiaryName}
+              <span className="font-medium">Salarié en transition :</span> {beneficiaryName}
             </p>
           </div>
 

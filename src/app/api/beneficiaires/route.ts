@@ -8,16 +8,9 @@ export async function GET(request: NextRequest) {
   const user = await requireAuth();
   if (!user) return unauthorized();
 
-  const where: any = {};
-
-  if (user.role === "REFERENT") {
-    where.supervisorId = user.id;
-  }
-
+  // Tous les utilisateurs SEVE voient tous les salariés (base AGK partagée)
   const beneficiaries = await prisma.beneficiary.findMany({
-    where,
     include: {
-      supervisor: { select: { id: true, firstName: true, lastName: true } },
       _count: {
         select: {
           prospections: true,
@@ -46,7 +39,6 @@ export async function POST(request: NextRequest) {
     const beneficiary = await prisma.beneficiary.create({
       data: {
         ...data,
-        supervisorId: user.id,
       },
     });
 

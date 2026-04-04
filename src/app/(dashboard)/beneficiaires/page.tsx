@@ -44,14 +44,14 @@ export default function BeneficiairesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Bénéficiaires</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Salariés en transition</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Suivi des bénéficiaires et leurs parcours
+            Suivi des salariés en transition et leurs parcours
           </p>
         </div>
         <button className="btn-primary">
           <Plus className="h-5 w-5 mr-2" />
-          Nouveau bénéficiaire
+          Nouveau salarié
         </button>
       </div>
 
@@ -77,7 +77,7 @@ export default function BeneficiairesPage() {
         <input
           type="text"
           className="input pl-10"
-          placeholder="Rechercher un bénéficiaire..."
+          placeholder="Rechercher un salarié en transition..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -91,7 +91,7 @@ export default function BeneficiairesPage() {
       ) : filtered.length === 0 ? (
         <div className="card p-12 text-center">
           <Users className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900">Aucun bénéficiaire</h3>
+          <h3 className="text-lg font-medium text-gray-900">Aucun salarié en transition</h3>
         </div>
       ) : (
         <div className="card divide-y divide-gray-100">
@@ -117,13 +117,4 @@ export default function BeneficiairesPage() {
                   </div>
                 </div>
                 <div className="text-sm text-gray-400">
-                  {b._count?.prospections || 0} entreprise(s)
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+                  {b._count?.prospections || 0} entreprise(s)

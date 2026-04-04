@@ -8,7 +8,7 @@ datasource db {
 }
 
 // ============================================================
-// UTILISATEURS & AUTHENTIFICATION
+// UTILISATEURS SEVE (table séparée de la table users AGK)
 // ============================================================
 
 enum Role {
@@ -31,11 +31,49 @@ model User {
   // Relations
   companies      Company[]       @relation("CreatedByUser")
   supervisedCompanies Company[]  @relation("SupervisorUser")
-  beneficiaries  Beneficiary[]   @relation("SupervisorBeneficiary")
   contacts       Contact[]
   reminders      Reminder[]
 
-  @@map("users")
+  @@map("seve_users")
+}
+
+// ============================================================
+// SALARIÉS EN TRANSITION (table partagée avec AGK App)
+// Les noms Prisma (firstName, lastName) sont mappés vers
+// les colonnes françaises (prenom, nom) de la table existante.
+// ============================================================
+
+model Beneficiary {
+  id                Int       @id @default(autoincrement())
+  firstName         String    @map("prenom")
+  lastName          String    @map("nom")
+  email             String?   @default("")
+  phone             String?   @default("") @map("telephone")
+  notes             String?   @default("")
+  targetJob         String?   @default("") @map("target_job")
+
+  // Champs AGK existants
+  dateNaissance     DateTime? @map("date_naissance") @db.Date
+  adresse           String?   @default("")
+  situation         String?   @default("")
+  cipId             Int?      @map("cip_id")
+  dateEntreeAci     DateTime? @map("date_entree_aci") @db.Date
+  dateSortieAci     DateTime? @map("date_sortie_aci") @db.Date
+  typeContrat       String?   @default("CDDI") @map("type_contrat")
+  motifSortie       String?   @map("motif_sortie")
+  heuresTravaillees Decimal?  @default(0) @map("heures_travaillees") @db.Decimal(8, 2)
+  numeroAsp         String?   @map("numero_asp")
+  encadrantReferent String?   @map("encadrant_referent")
+  statutParcours    String?   @default("actif") @map("statut_parcours")
+
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @default(now()) @map("updated_at")
+
+  // Relations SEVE
+  prospections      Prospection[]
+  contacts          Contact[]
+
+  @@map("beneficiaires")
 }
 
 // ============================================================
@@ -90,7 +128,7 @@ model Company {
 model CompanyContact {
   id        String   @id @default(cuid())
   name      String
-  position  String   @default("") // Direction, RH, etc.
+  position  String   @default("")
   phone     String   @default("")
   email     String   @default("")
 
@@ -131,7 +169,7 @@ model Contact {
   companyId     String
 
   beneficiary   Beneficiary?   @relation(fields: [beneficiaryId], references: [id])
-  beneficiaryId String?
+  beneficiaryId Int?
 
   createdBy     User           @relation(fields: [createdById], references: [id])
   createdById   String
@@ -145,34 +183,7 @@ model Contact {
 }
 
 // ============================================================
-// BÉNÉFICIAIRES
-// ============================================================
-
-model Beneficiary {
-  id           String   @id @default(cuid())
-  firstName    String
-  lastName     String
-  targetJob    String   @default("")
-  phone        String   @default("")
-  email        String   @default("")
-  notes        String   @default("")
-
-  supervisor   User     @relation("SupervisorBeneficiary", fields: [supervisorId], references: [id])
-  supervisorId String
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Relations
-  prospections Prospection[]
-  contacts     Contact[]
-
-  @@index([supervisorId])
-  @@map("beneficiaries")
-}
-
-// ============================================================
-// PROSPECTIONS (liaison bénéficiaire/entreprise)
+// PROSPECTIONS (liaison salarié en transition/entreprise)
 // ============================================================
 
 enum ProspectionStatus {
@@ -195,7 +206,7 @@ model Prospection {
   companyId     String
 
   beneficiary   Beneficiary       @relation(fields: [beneficiaryId], references: [id], onDelete: Cascade)
-  beneficiaryId String
+  beneficiaryId Int
 
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
@@ -232,16 +243,14 @@ model Reminder {
   company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyId     String
 
-  beneficiaryId String?
+  beneficiaryId Int?
 
   createdBy     User           @relation(fields: [createdById], references: [id])
   createdById   String
 
   createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
 
+  @@index([companyId])
   @@index([date])
-  @@index([status])
-  @@index([createdById])
   @@map("reminders")
 }

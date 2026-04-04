@@ -11,10 +11,14 @@ export async function GET(
   const user = await requireAuth();
   if (!user) return unauthorized();
 
+  const id = parseInt(params.id, 10);
+  if (isNaN(id)) {
+    return NextResponse.json({ error: "ID invalide" }, { status: 400 });
+  }
+
   const beneficiary = await prisma.beneficiary.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
-      supervisor: { select: { id: true, firstName: true, lastName: true, email: true } },
       prospections: {
         orderBy: { startDate: "desc" },
         include: {
@@ -32,11 +36,7 @@ export async function GET(
   });
 
   if (!beneficiary) {
-    return NextResponse.json({ error: "Bénéficiaire non trouvé" }, { status: 404 });
-  }
-
-  if (user.role === "REFERENT" && beneficiary.supervisorId !== user.id) {
-    return forbidden();
+    return NextResponse.json({ error: "Salarié en transition non trouvé" }, { status: 404 });
   }
 
   return NextResponse.json(beneficiary);
@@ -50,16 +50,17 @@ export async function PATCH(
   const user = await requireAuth();
   if (!user) return unauthorized();
 
+  const id = parseInt(params.id, 10);
+  if (isNaN(id)) {
+    return NextResponse.json({ error: "ID invalide" }, { status: 400 });
+  }
+
   const existing = await prisma.beneficiary.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!existing) {
-    return NextResponse.json({ error: "Bénéficiaire non trouvé" }, { status: 404 });
-  }
-
-  if (user.role === "REFERENT" && existing.supervisorId !== user.id) {
-    return forbidden();
+    return NextResponse.json({ error: "Salarié en transition non trouvé" }, { status: 404 });
   }
 
   try {
@@ -67,7 +68,7 @@ export async function PATCH(
     const data = createBeneficiarySchema.partial().parse(body);
 
     const updated = await prisma.beneficiary.update({
-      where: { id: params.id },
+      where: { id },
       data,
     });
 

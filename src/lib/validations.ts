@@ -29,7 +29,7 @@ export const updateCompanySchema = createCompanySchema.partial();
 
 export const createContactSchema = z.object({
   companyId: z.string().min(1),
-  beneficiaryId: z.string().optional(),
+  beneficiaryId: z.coerce.number().int().optional(),
   date: z.string().or(z.date()).transform((v) => new Date(v)),
   type: z.enum(["APPEL", "EMAIL", "VISITE", "AUTRE"]),
   outcome: z.enum(["POSITIF", "NEGATIF", "EN_ATTENTE"]).default("EN_ATTENTE"),
@@ -37,7 +37,7 @@ export const createContactSchema = z.object({
 });
 
 // ============================================================
-// BÉNÉFICIAIRES
+// SALARIÉS EN TRANSITION
 // ============================================================
 
 export const createBeneficiarySchema = z.object({
@@ -55,7 +55,7 @@ export const createBeneficiarySchema = z.object({
 
 export const createReminderSchema = z.object({
   companyId: z.string().min(1),
-  beneficiaryId: z.string().optional(),
+  beneficiaryId: z.coerce.number().int().optional(),
   date: z.string().or(z.date()).transform((v) => new Date(v)),
   type: z.enum(["SUIVI", "ECHEANCE", "OPPORTUNITE"]).default("SUIVI"),
   comment: z.string().max(2000).default(""),
@@ -73,5 +73,4 @@ export const loginSchema = z.object({
 export type CreateCompanyInput = z.infer<typeof createCompanySchema>;
 export type UpdateCompanyInput = z.infer<typeof updateCompanySchema>;
 export type CreateContactInput = z.infer<typeof createContactSchema>;
-export type CreateBeneficiaryInput = z.infer<typeof createBeneficiarySchema>;
-export type CreateReminderInput = z.infer<typeof createReminderSchema>;
+export type CreateBeneficiaryInput = z.infer<typeof createBeneficiarySchema

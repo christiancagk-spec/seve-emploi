@@ -5,7 +5,7 @@ import { X, Save, Users } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface Beneficiary {
-  id: string;
+  id: number;
   firstName: string;
   lastName: string;
   targetJob: string;
@@ -49,7 +49,7 @@ export default function BeneficiaryFormModal({ beneficiary, onClose, onSuccess }
       });
 
       if (res.ok) {
-        toast.success(isEditing ? "Bénéficiaire mis à jour" : "Bénéficiaire créé");
+        toast.success(isEditing ? "Salarié en transition mis à jour" : "Salarié en transition ajouté");
         onSuccess();
       } else {
         const data = await res.json();
@@ -68,7 +68,7 @@ export default function BeneficiaryFormModal({ beneficiary, onClose, onSuccess }
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
             <Users className="h-5 w-5 text-primary-500" />
-            {isEditing ? "Modifier le bénéficiaire" : "Nouveau bénéficiaire"}
+            {isEditing ? "Modifier le salarié en transition" : "Nouveau salarié en transition"}
           </h2>
           <button
             onClick={onClose}
@@ -143,7 +143,7 @@ export default function BeneficiaryFormModal({ beneficiary, onClose, onSuccess }
             <textarea
               className="input"
               rows={3}
-              placeholder="Notes sur le bénéficiaire..."
+              placeholder="Notes sur le salarié en transition..."
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
             />
