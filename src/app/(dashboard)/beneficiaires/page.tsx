@@ -25,7 +25,7 @@ export default function BeneficiairesPage() {
   }, []);
 
   const filtered = beneficiaries.filter((b) =>
-    `${b.firstName} ${b.lastName} ${b.targetJob}`
+    `${b.firstName || ""} ${b.lastName || ""} ${b.targetJob || ""}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
@@ -109,7 +109,7 @@ export default function BeneficiairesPage() {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">
-                      {b.firstName} {b.lastName}
+                      {b.firstName || ""} {b.lastName || ""}
                     </p>
                     <p className="text-sm text-gray-500">
                       {b.targetJob || "Poste non renseigné"}

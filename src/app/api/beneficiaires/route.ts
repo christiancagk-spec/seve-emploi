@@ -5,26 +5,34 @@ import { createBeneficiarySchema } from "@/lib/validations";
 
 // GET /api/beneficiaires
 export async function GET(request: NextRequest) {
-  const user = await requireAuth();
-  if (!user) return unauthorized();
+  try {
+    const user = await requireAuth();
+    if (!user) return unauthorized();
 
-  // Tous les utilisateurs SEVE voient tous les salariés (base AGK partagée)
-  const beneficiaries = await prisma.beneficiary.findMany({
-    include: {
-      _count: {
-        select: {
-          prospections: true,
-          contacts: true,
+    // Tous les utilisateurs SEVE voient tous les salariés (base AGK partagée)
+    const beneficiaries = await prisma.beneficiary.findMany({
+      include: {
+        _count: {
+          select: {
+            prospections: true,
+            contacts: true,
+          },
+        },
+        prospections: {
+          select: { status: true },
         },
       },
-      prospections: {
-        select: { status: true },
-      },
-    },
-    orderBy: { id: "desc" },
-  });
+      orderBy: { id: "desc" },
+    });
 
-  return NextResponse.json(beneficiaries);
+    return NextResponse.json(beneficiaries);
+  } catch (error: any) {
+    console.error("GET /api/beneficiaires error:", error);
+    return NextResponse.json(
+      { error: error?.message || "Erreur interne du serveur" },
+      { status: 500 }
+    );
+  }
 }
 
 // POST /api/beneficiaires
