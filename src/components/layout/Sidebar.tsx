@@ -13,13 +13,11 @@ import {
 
 const AGK_BASE_URL = process.env.NEXT_PUBLIC_AGK_URL || "https://agk-app-production.up.railway.app";
 
-// Navigation AGK principale (liens vers l'app AGK)
-const agkNavigation = [
-  { name: "Tableau de bord", href: `${AGK_BASE_URL}/dashboard`, icon: "📊", external: true },
-  { name: "Salariés en transition", href: `${AGK_BASE_URL}/dashboard`, icon: "👥", external: true },
-  { name: "Suivi ACI", href: `${AGK_BASE_URL}/dashboard`, icon: "📋", external: true },
-  { name: "SEVE 2", href: `${AGK_BASE_URL}/dashboard`, icon: "🌿", external: true },
-];
+// Lien retour vers l'app AGK
+const agkReturnLink = {
+  name: "← Retour Suivi CIP",
+  href: `${AGK_BASE_URL}/suivi-cip`,
+};
 
 // Navigation du module Prospection (liens internes)
 const prospectionNav = [
@@ -100,25 +98,18 @@ export default function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
           </div>
         </div>
 
-        {/* Navigation AGK */}
+        {/* Navigation */}
         <nav className="mt-1 px-3 flex-1 overflow-y-auto">
-          <div className="mb-1">
-            <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-green-500/60">
-              Navigation
-            </p>
-          </div>
-
-          {agkNavigation.map((item) => (
+          {/* Lien retour Suivi CIP */}
+          <div className="mb-3">
             <a
-              key={item.name}
-              href={item.href}
+              href={agkReturnLink.href}
               onClick={onClose}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-green-200/80 hover:bg-white/10 hover:text-white transition-colors mb-0.5"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-green-300/80 hover:bg-white/10 hover:text-white transition-colors"
             >
-              <span className="text-base">{item.icon}</span>
-              {item.name}
+              {agkReturnLink.name}
             </a>
-          ))}
+          </div>
 
           {/* Section Prospection SEVE */}
           <div className="mt-4 mb-1">
