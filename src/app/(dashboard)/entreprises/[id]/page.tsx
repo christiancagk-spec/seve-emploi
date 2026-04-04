@@ -22,6 +22,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import CompanyFormModal from "@/components/entreprises/CompanyFormModal";
 import AddProspectionModal from "@/components/entreprises/AddProspectionModal";
+import AddReminderModal from "@/components/entreprises/AddReminderModal";
 
 // Labels & styles
 const placementTypeLabel: Record<string, string> = {
@@ -67,6 +68,7 @@ export default function CompanyDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAddProspOpen, setIsAddProspOpen] = useState(false);
+  const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [filterType, setFilterType] = useState<string>("TOUS");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
@@ -98,6 +100,11 @@ export default function CompanyDetailPage() {
 
   const handleProspectionAdded = () => {
     setIsAddProspOpen(false);
+    fetchCompany();
+  };
+
+  const handleReminderAdded = () => {
+    setIsReminderOpen(false);
     fetchCompany();
   };
 
@@ -448,31 +455,61 @@ export default function CompanyDetailPage() {
       </div>
 
       {/* Rappels */}
-      {company.reminders && company.reminders.length > 0 && (
-        <div className="card">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary-500" />
-              Rappels
-            </h2>
-          </div>
-          <div className="divide-y divide-gray-50">
-            {company.reminders.map((r: any) => (
-              <div key={r.id} className="px-6 py-4 hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{r.type}</p>
-                    <p className="text-xs text-gray-500">{r.comment}</p>
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    {new Date(r.date).toLocaleDateString("fr-FR")}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="card">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-primary-500" />
+            Rappels
+          </h2>
+          <button
+            onClick={() => setIsReminderOpen(true)}
+            className="btn-primary text-sm py-1.5 px-3"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Rappel
+          </button>
         </div>
-      )}
+        <div className="divide-y divide-gray-50">
+          {company.reminders && company.reminders.length > 0 ? (
+            company.reminders.map((r: any) => {
+              const reminderDate = new Date(r.date);
+              const isOverdue = reminderDate < new Date() && r.status !== "TERMINE";
+              const typeLabel: Record<string, string> = {
+                SUIVI: "Suivi",
+                ECHEANCE: "Échéance",
+                OPPORTUNITE: "Opportunité",
+              };
+              return (
+                <div key={r.id} className={`px-6 py-4 hover:bg-gray-50 ${isOverdue ? "bg-red-50/50" : ""}`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-gray-900">
+                          {typeLabel[r.type] || r.type}
+                        </p>
+                        {isOverdue && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-medium">
+                            En retard
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5">{r.comment || "Pas de commentaire"}</p>
+                    </div>
+                    <p className={`text-xs whitespace-nowrap ml-4 ${isOverdue ? "text-red-500 font-medium" : "text-gray-400"}`}>
+                      {reminderDate.toLocaleDateString("fr-FR")}
+                    </p>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="p-6 text-center text-gray-400">
+              <Calendar className="h-8 w-8 mx-auto mb-2" />
+              <p>Aucun rappel planifié</p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Modals */}
       {isFormOpen && (
@@ -489,6 +526,15 @@ export default function CompanyDetailPage() {
           companyName={company.companyName}
           onClose={() => setIsAddProspOpen(false)}
           onSuccess={handleProspectionAdded}
+        />
+      )}
+
+      {isReminderOpen && (
+        <AddReminderModal
+          companyId={company.id}
+          companyName={company.companyName}
+          onClose={() => setIsReminderOpen(false)}
+          onSuccess={handleReminderAdded}
         />
       )}
     </div>
