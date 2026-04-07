@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { DM_Sans } from "next/font/google";
+import { Syne, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 
-const dmSans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
+const syne    = Syne({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-syne" });
+const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-jakarta" });
 
 export const metadata: Metadata = {
   title: "AGK · Prospection SEVE",
@@ -17,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className={dmSans.className}>
+      <body className={`${syne.variable} ${jakarta.variable}`}>
         <Providers>{children}</Providers>
       </body>
     </html>

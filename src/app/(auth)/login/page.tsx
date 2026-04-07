@@ -3,56 +3,86 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { LogIn, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail]             = useState("");
+  const [password, setPassword]       = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [error, setError]             = useState("");
+  const [loading, setLoading]         = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
+      const result = await signIn("credentials", { email, password, redirect: false });
       if (result?.error) {
-        setError(result.error);
+        setError(result.error === "CredentialsSignin" ? "Identifiants incorrects" : result.error);
+        setPassword("");
       } else {
         router.push("/dashboard");
         router.refresh();
       }
     } catch {
-      setError("Une erreur est survenue");
+      setError("Impossible de joindre le serveur");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <span className="text-4xl">🌿</span>
-          <h1 className="text-3xl font-bold text-primary-900 mt-2">An Grèn Kouler</h1>
-          <p className="mt-1 text-primary-600">Prospection SEVE</p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center px-4 overflow-hidden relative"
+         style={{ backgroundColor: "#0D3321" }}>
 
-        <div className="card p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Blobs de fond */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute rounded-full opacity-20"
+             style={{ width: 500, height: 500, top: -150, right: -80,
+               background: "radial-gradient(circle, #1E7A45 0%, transparent 70%)", filter: "blur(70px)" }} />
+        <div className="absolute rounded-full opacity-10"
+             style={{ width: 350, height: 350, bottom: -80, left: -60,
+               background: "radial-gradient(circle, #D97706 0%, transparent 70%)", filter: "blur(70px)" }} />
+      </div>
+
+      {/* Grille décorative */}
+      <div className="pointer-events-none absolute inset-0"
+           style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)",
+             backgroundSize: "40px 40px" }} />
+
+      {/* Card */}
+      <div className="relative z-10 w-full max-w-[400px]"
+           style={{ animation: "fadeUp 0.45s ease both" }}>
+        <div className="rounded-2xl px-9 py-10"
+             style={{ background: "rgba(250,250,247,0.97)",
+               boxShadow: "0 25px 60px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.08)" }}>
+
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4"
+                 style={{ background: "#0D3321" }}>
+              <svg width="28" height="28" viewBox="0 0 30 30" fill="none">
+                <path d="M15 4C15 4 6 9 6 17C6 22.5 10 26 15 26C20 26 24 22.5 24 17C24 9 15 4 15 4Z" fill="#1E7A45"/>
+                <path d="M15 26L15 14" stroke="#E6F4EC" strokeWidth="1.5" strokeLinecap="round"/>
+                <path d="M15 18L19 14" stroke="#E6F4EC" strokeWidth="1.5" strokeLinecap="round"/>
+                <path d="M15 21L11 17" stroke="#E6F4EC" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold leading-tight" style={{ fontFamily: "var(--font-syne), sans-serif", color: "#0D3321", letterSpacing: "-0.03em" }}>
+              Prospection SEVE
+            </h1>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-widest" style={{ color: "#5A7065" }}>
+              An Grèn Koulèr
+            </p>
+          </div>
+
+          <div style={{ height: 1, background: "#E4EDE7", marginBottom: "1.75rem" }} />
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="email" className="label">
-                Adresse email
-              </label>
+              <label htmlFor="email" className="label">Adresse e-mail</label>
               <input
                 id="email"
                 type="email"
@@ -66,9 +96,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="label">
-                Mot de passe
-              </label>
+              <label htmlFor="password" className="label">Mot de passe</label>
               <div className="relative">
                 <input
                   id="password"
@@ -76,41 +104,56 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   required
                   className="input pr-10"
-                  placeholder="Votre mot de passe"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center transition-colors"
+                  style={{ color: "#9CAF9E" }}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 p-4">
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="flex items-center gap-2 rounded-lg p-3 text-sm"
+                   style={{ background: "#FEF2F2", border: "1.5px solid #FECACA", color: "#991B1B" }}>
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                {error}
               </div>
             )}
 
-            <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
-              <LogIn className="h-5 w-5 mr-2" />
-              {loading ? "Connexion..." : "Se connecter"}
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full justify-center mt-2"
+              style={{ padding: "11px 16px" }}
+            >
+              {loading && (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full mr-2"
+                      style={{ animation: "spin 0.6s linear infinite", display: "inline-block" }} />
+              )}
+              {loading ? "Connexion…" : "Se connecter"}
             </button>
           </form>
         </div>
 
-        <p className="mt-4 text-center text-xs text-gray-500">
-          An Grèn Kouler &mdash; Médiation Active · La Réunion
+        <p className="mt-5 text-center text-xs" style={{ color: "rgba(255,255,255,0.28)", letterSpacing: "0.05em" }}>
+          An Grèn Koulèr — Médiation Active · La Réunion &copy; 2026
         </p>
       </div>
+
+      <style jsx global>{`
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   );
 }
