@@ -42,6 +42,7 @@ export default function EntreprisesPage() {
   const [filterStatus, setFilterStatus] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
 
   const fetchCompanies = useCallback(async () => {
     try {
@@ -65,9 +66,7 @@ export default function EntreprisesPage() {
     return () => clearTimeout(debounce);
   }, [fetchCompanies]);
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Supprimer l'entreprise "${name}" ?`)) return;
-
+  const handleDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/entreprises/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -78,6 +77,8 @@ export default function EntreprisesPage() {
       }
     } catch {
       toast.error("Erreur réseau");
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -184,8 +185,28 @@ export default function EntreprisesPage() {
 
       {/* Liste */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
+        <div className="card overflow-hidden animate-pulse">
+          <div className="hidden md:block">
+            <div className="bg-gray-50 h-10" />
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="flex items-center gap-4 px-6 py-4 border-t border-gray-100">
+                <div className="h-4 bg-gray-200 rounded w-1/4" />
+                <div className="h-4 bg-gray-100 rounded w-1/6" />
+                <div className="h-4 bg-gray-100 rounded w-1/5" />
+                <div className="h-4 bg-gray-100 rounded w-8" />
+                <div className="h-6 bg-gray-200 rounded-full w-20" />
+                <div className="h-6 bg-gray-100 rounded w-16 ml-auto" />
+              </div>
+            ))}
+          </div>
+          <div className="md:hidden divide-y divide-gray-100">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="p-4 space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/2" />
+                <div className="h-3 bg-gray-100 rounded w-1/3" />
+              </div>
+            ))}
+          </div>
         </div>
       ) : companies.length === 0 ? (
         <div className="card p-12 text-center">
@@ -287,7 +308,7 @@ export default function EntreprisesPage() {
                           <Pencil className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(company.id, company.companyName)}
+                          onClick={() => setConfirmDelete({ id: company.id, name: company.companyName })}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50"
                           title="Supprimer"
                         >
@@ -336,7 +357,7 @@ export default function EntreprisesPage() {
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(company.id, company.companyName)}
+                        onClick={() => setConfirmDelete({ id: company.id, name: company.companyName })}
                         className="p-1.5 rounded text-red-600"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -357,6 +378,29 @@ export default function EntreprisesPage() {
           onClose={() => { setIsFormOpen(false); setEditingCompany(null); }}
           onSuccess={handleFormSuccess}
         />
+      )}
+
+      {/* Confirmation suppression */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">Supprimer l'entreprise ?</h3>
+            <p className="text-gray-500 text-sm">
+              <span className="font-medium text-gray-700">{confirmDelete.name}</span> sera définitivement supprimée. Cette action est irréversible.
+            </p>
+            <div className="flex justify-end gap-3 pt-2">
+              <button onClick={() => setConfirmDelete(null)} className="btn-secondary">
+                Annuler
+              </button>
+              <button
+                onClick={() => handleDelete(confirmDelete.id)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
