@@ -126,7 +126,7 @@ export default function DashboardPage() {
       const res = await fetch("/api/rappels", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: "TERMINE" }),
+        body: JSON.stringify({ id, status: "COMPLETE" }),
       });
       if (res.ok) {
         setReminders((prev) => prev.filter((r) => r.id !== id));
@@ -166,8 +166,17 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
+      <div className="space-y-8 animate-pulse">
+        <div className="h-8 bg-gray-200 rounded w-56" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="card p-5 h-24 bg-gray-100" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="card h-64 bg-gray-100" />
+          <div className="card h-64 bg-gray-100" />
+        </div>
       </div>
     );
   }

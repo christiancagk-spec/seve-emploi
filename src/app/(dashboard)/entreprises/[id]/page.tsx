@@ -121,7 +121,7 @@ export default function CompanyDetailPage() {
       const res = await fetch("/api/rappels", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: reminderId, status: "TERMINE" }),
+        body: JSON.stringify({ id: reminderId, status: "COMPLETE" }),
       });
       if (res.ok) {
         toast.success("Rappel terminé");
@@ -530,7 +530,7 @@ export default function CompanyDetailPage() {
           {company.reminders && company.reminders.length > 0 ? (
             company.reminders.map((r: any) => {
               const reminderDate = new Date(r.date);
-              const isOverdue = reminderDate < new Date() && r.status !== "TERMINE";
+              const isOverdue = reminderDate < new Date() && r.status !== "COMPLETE";
               const typeLabel: Record<string, string> = {
                 SUIVI: "Suivi",
                 ECHEANCE: "Échéance",
@@ -556,7 +556,7 @@ export default function CompanyDetailPage() {
                       <p className={`text-xs whitespace-nowrap ${isOverdue ? "text-red-500 font-medium" : "text-gray-400"}`}>
                         {reminderDate.toLocaleDateString("fr-FR")}
                       </p>
-                      {r.status !== "TERMINE" && (
+                      {r.status !== "COMPLETE" && (
                         <button
                           onClick={() => handleDismissReminder(r.id)}
                           className="p-1 rounded-full text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors"
@@ -565,7 +565,7 @@ export default function CompanyDetailPage() {
                           <Check className="h-4 w-4" />
                         </button>
                       )}
-                      {r.status === "TERMINE" && (
+                      {r.status === "COMPLETE" && (
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-medium">
                           Fait
                         </span>

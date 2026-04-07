@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { Users, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import BeneficiaryFormModal from "@/components/beneficiaires/BeneficiaryFormModal";
 
 export default function BeneficiairesPage() {
   const [beneficiaries, setBeneficiaries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -50,7 +52,7 @@ export default function BeneficiairesPage() {
             Suivi des salariés en transition et leurs parcours
           </p>
         </div>
-        <button className="btn-primary">
+        <button className="btn-primary" onClick={() => setShowModal(true)}>
           <Plus className="h-5 w-5 mr-2" />
           Nouveau salarié
         </button>
@@ -86,13 +88,27 @@ export default function BeneficiairesPage() {
 
       {/* Liste */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
+        <div className="card divide-y divide-gray-100">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="p-4 flex items-center gap-3 animate-pulse">
+              <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/3" />
+                <div className="h-3 bg-gray-100 rounded w-1/4" />
+              </div>
+              <div className="h-3 bg-gray-100 rounded w-16" />
+            </div>
+          ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="card p-12 text-center">
           <Users className="h-12 w-12 mx-auto text-gray-300 mb-4" />
           <h3 className="text-lg font-medium text-gray-900">Aucun salarié en transition</h3>
+          <p className="text-gray-400 text-sm mt-1 mb-6">Commencez par ajouter un premier salarié</p>
+          <button className="btn-primary mx-auto" onClick={() => setShowModal(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nouveau salarié
+          </button>
         </div>
       ) : (
         <div className="card divide-y divide-gray-100">
@@ -125,6 +141,26 @@ export default function BeneficiairesPage() {
             </Link>
           ))}
         </div>
+      )}
+
+      {showModal && (
+        <BeneficiaryFormModal
+          beneficiary={null}
+          onClose={() => setShowModal(false)}
+          onSuccess={async () => {
+            setShowModal(false);
+            setLoading(true);
+            try {
+              const res = await fetch("/api/beneficiaires");
+              const data = await res.json();
+              setBeneficiaries(Array.isArray(data) ? data : []);
+            } catch {
+              toast.error("Erreur de rechargement");
+            } finally {
+              setLoading(false);
+            }
+          }}
+        />
       )}
     </div>
   );
