@@ -66,6 +66,19 @@ model Beneficiary {
   notes             String?
   targetJob         String?   @map("target_job")
 
+  // Colonnes AGK (ne pas supprimer — partagees avec CIP Terrain)
+  cipId             Int?      @map("cip_id")
+  dateSortie        DateTime? @map("date_sortie") @db.Date
+  motifSortie       String?   @map("motif_sortie")
+  heuresTravaillees Decimal?  @map("heures_travaillees") @db.Decimal(8,2)
+  numeroAsp         String?   @map("numero_asp")
+  encadrantReferent String?   @map("encadrant_referent")
+  progression       Int?
+  objectifPro       String?   @map("objectif_professionnel")
+  posteCible        String?   @map("poste_cible")
+  createdAt         DateTime? @default(now()) @map("created_at")
+  updatedAt         DateTime? @updatedAt @map("updated_at")
+
   // Relations SEVE
   prospections      Prospection[]
   contacts          Contact[]
