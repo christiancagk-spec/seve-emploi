@@ -8,6 +8,7 @@ import {
   Users,
   Search,
   Settings,
+  BarChart3,
   X,
 } from "lucide-react";
 
@@ -25,6 +26,7 @@ const prospectionNav = [
   { name: "Entreprises", href: "/entreprises", icon: Building2 },
   { name: "Salariés en transition", href: "/beneficiaires", icon: Users },
   { name: "Recherche", href: "/recherche", icon: Search },
+  { name: "Rapports", href: "/rapports", icon: BarChart3 },
 ];
 
 const adminNav = [
