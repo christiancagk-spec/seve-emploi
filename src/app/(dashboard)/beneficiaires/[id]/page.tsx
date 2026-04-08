@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import toast from "react-hot-toast";
 import ProspectionFormModal from "@/components/beneficiaires/ProspectionFormModal";
+import BeneficiaryFormModal from "@/components/beneficiaires/BeneficiaryFormModal";
 
 const placementTypeLabel: Record<string, string> = {
   PMSMP: "PMSMP",
@@ -59,6 +60,7 @@ export default function BeneficiaryDetailPage() {
   const [beneficiary, setBeneficiary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isProspOpen, setIsProspOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const fetchBeneficiary = async () => {
@@ -151,6 +153,9 @@ export default function BeneficiaryDetailPage() {
             </div>
           </div>
         </div>
+        <button onClick={() => setIsEditOpen(true)} className="btn-secondary text-sm">
+          Modifier les infos
+        </button>
       </div>
 
       {/* Info cards */}
@@ -302,13 +307,24 @@ export default function BeneficiaryDetailPage() {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modals */}
       {isProspOpen && (
         <ProspectionFormModal
           beneficiaryId={String(beneficiary.id)}
           beneficiaryName={`${beneficiary.firstName} ${beneficiary.lastName}`}
           onClose={() => setIsProspOpen(false)}
           onSuccess={handleProspectionAdded}
+        />
+      )}
+
+      {isEditOpen && (
+        <BeneficiaryFormModal
+          beneficiary={beneficiary}
+          onClose={() => setIsEditOpen(false)}
+          onSuccess={() => {
+            setIsEditOpen(false);
+            fetchBeneficiary();
+          }}
         />
       )}
     </div>
