@@ -73,7 +73,7 @@ model Beneficiary {
   heuresTravaillees Decimal?  @map("heures_travaillees") @db.Decimal(8,2)
   numeroAsp         String?   @map("numero_asp")
   encadrantReferent String?   @map("encadrant_referent")
-  progression       Int?
+  progression       String?
   objectifPro       String?   @map("objectif_professionnel")
   posteCible        String?   @map("poste_cible")
   createdAt         DateTime? @default(now()) @map("created_at")
