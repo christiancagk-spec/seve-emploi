@@ -62,6 +62,7 @@ export default function DashboardPage() {
   const { data: session } = useSession();
   const [stats, setStats] = useState<Stats>({ total: 0, enAttente: 0, pmsmp: 0, contrats: 0 });
   const [placementStats, setPlacementStats] = useState<PlacementStats>({ total: 0, byType: {}, enCours: 0 });
+  const [benefCount, setBenefCount] = useState(0);
   const [reminders, setReminders] = useState<ReminderItem[]>([]);
   const [recentCompanies, setRecentCompanies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,10 +70,11 @@ export default function DashboardPage() {
 
   const fetchData = async () => {
     try {
-      const [companiesRes, remindersRes, prospectsRes] = await Promise.all([
+      const [companiesRes, remindersRes, prospectsRes, benefRes] = await Promise.all([
         fetch("/api/entreprises?limit=10"),
         fetch("/api/rappels?status=EN_ATTENTE"),
         fetch("/api/prospections"),
+        fetch("/api/beneficiaires"),
       ]);
 
       const companiesData = await companiesRes.json();
@@ -81,6 +83,12 @@ export default function DashboardPage() {
       const companies = companiesData.companies || [];
       setRecentCompanies(companies.slice(0, 5));
       setReminders(Array.isArray(remindersData) ? remindersData.slice(0, 5) : []);
+
+      // Nombre de salaries en transition
+      if (benefRes.ok) {
+        const benefData = await benefRes.json();
+        setBenefCount(Array.isArray(benefData) ? benefData.length : 0);
+      }
 
       // Stats entreprises
       const allRes = await fetch("/api/entreprises?limit=1000");
@@ -142,10 +150,11 @@ export default function DashboardPage() {
   };
 
   const statCards = [
-    { label: "Entreprises", value: stats.total, icon: Building2, bgColor: "bg-primary-50", textColor: "text-primary-600" },
+    { label: "Salaries", value: benefCount, icon: Users, bgColor: "bg-primary-50", textColor: "text-primary-600", href: "/beneficiaires" },
+    { label: "Entreprises", value: stats.total, icon: Building2, bgColor: "bg-indigo-50", textColor: "text-indigo-600", href: "/entreprises" },
+    { label: "Placements actifs", value: placementStats.enCours, icon: TrendingUp, bgColor: "bg-green-50", textColor: "text-green-600" },
+    { label: "Contrats signes", value: stats.contrats, icon: Briefcase, bgColor: "bg-emerald-50", textColor: "text-emerald-600" },
     { label: "En attente", value: stats.enAttente, icon: Clock, bgColor: "bg-yellow-50", textColor: "text-yellow-600" },
-    { label: "Placements actifs", value: placementStats.enCours, icon: Users, bgColor: "bg-green-50", textColor: "text-green-600" },
-    { label: "Total placements", value: placementStats.total, icon: Briefcase, bgColor: "bg-blue-50", textColor: "text-blue-600" },
   ];
 
   const statusBadge = (status: string) => {
@@ -194,20 +203,24 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((stat) => (
-          <div key={stat.label} className="card p-5">
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                <stat.icon className={`h-6 w-6 ${stat.textColor}`} />
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        {statCards.map((stat) => {
+          const CardWrapper = stat.href ? Link : "div";
+          const cardProps = stat.href ? { href: stat.href } : {};
+          return (
+            <CardWrapper key={stat.label} {...(cardProps as any)} className={`card p-5 ${stat.href ? "hover:shadow-md transition-shadow cursor-pointer" : ""}`}>
+              <div className="flex items-center gap-4">
+                <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                  <stat.icon className={`h-6 w-6 ${stat.textColor}`} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">{stat.label}</p>
+                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              </div>
-            </div>
-          </div>
-        ))}
+            </CardWrapper>
+          );
+        })}
       </div>
 
       {/* Placements par type */}
