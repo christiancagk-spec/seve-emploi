@@ -194,7 +194,7 @@ export default function BeneficiairesPage() {
               <div className="flex items-center gap-4 text-xs text-gray-400">
                 <span>{b._count?.prospections || 0} entreprise(s)</span>
                 <span>{b._count?.entretiens || 0} entretien(s)</span>
-                <span>{b._count?.evaluations || 0} eval.</span>
+                <span>{b._count?.evaluationsCip || 0} eval.</span>
               </div>
             </Link>
           ))}

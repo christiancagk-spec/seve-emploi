@@ -8,6 +8,7 @@ import {
   Briefcase,
   Building2,
   Calendar,
+  ClipboardList,
   MapPin,
   Phone,
   Mail,
@@ -62,6 +63,8 @@ export default function BeneficiaryDetailPage() {
   const [isProspOpen, setIsProspOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [cipData, setCipData] = useState<any>(null);
+  const [cipLoading, setCipLoading] = useState(true);
 
   const fetchBeneficiary = async () => {
     try {
@@ -82,6 +85,16 @@ export default function BeneficiaryDetailPage() {
 
   useEffect(() => {
     if (params.id) fetchBeneficiary();
+  }, [params.id]);
+
+  useEffect(() => {
+    if (params.id) {
+      fetch(`/api/beneficiaires/${params.id}/cip`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then(setCipData)
+        .catch(() => null)
+        .finally(() => setCipLoading(false));
+    }
   }, [params.id]);
 
   const handleProspectionAdded = () => {
@@ -303,6 +316,122 @@ export default function BeneficiaryDetailPage() {
               <p>Aucun placement pour le moment</p>
               <p className="text-xs mt-1">Cliquez sur "Associer" pour ajouter un placement en entreprise</p>
             </div>
+          )}
+        </div>
+      </div>
+
+      {/* Parcours CIP */}
+      <div className="card">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <ClipboardList className="h-5 w-5 text-primary-500" />
+            Parcours CIP
+            {cipData && (
+              <span className="text-xs text-gray-400 font-normal ml-2">
+                {cipData.counts.entretiens} entretiens &middot; {cipData.counts.evaluations} evaluations &middot; {cipData.counts.pmsmp} PMSMP &middot; {cipData.counts.emplois} emplois
+              </span>
+            )}
+          </h2>
+        </div>
+
+        <div className="px-6 py-4">
+          {cipLoading ? (
+            <div className="text-gray-400 text-sm">Chargement...</div>
+          ) : cipData ? (
+            <div className="space-y-6">
+              {/* Score evaluation */}
+              {cipData.scoreMoyen !== null && (
+                <div className="flex items-center gap-3">
+                  <div className="text-3xl font-bold text-primary-600">{cipData.scoreMoyen}/5</div>
+                  <div className="text-sm text-gray-500">Score moyen derniere evaluation</div>
+                </div>
+              )}
+
+              {/* Entretiens recents */}
+              {cipData.entretiens.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Derniers entretiens</h3>
+                  <div className="space-y-2">
+                    {cipData.entretiens.map((e: any) => (
+                      <div key={e.id} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                        <div>
+                          <span className="font-medium">{e.typeEntretien || "Entretien"}</span>
+                          {e.lieu && <span className="text-gray-400 ml-2">— {e.lieu}</span>}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                              e.statut === "realise"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-amber-100 text-amber-700"
+                            }`}
+                          >
+                            {e.statut || "-"}
+                          </span>
+                          <span className="text-gray-400">
+                            {e.dateEntretien
+                              ? new Date(e.dateEntretien).toLocaleDateString("fr-FR")
+                              : "-"}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* PMSMP */}
+              {cipData.pmsmp.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">PMSMP realisees</h3>
+                  <div className="space-y-2">
+                    {cipData.pmsmp.map((p: any) => (
+                      <div key={p.id} className="flex items-center justify-between p-2 bg-blue-50 rounded text-sm">
+                        <div>
+                          <span className="font-medium">{p.entreprise || "-"}</span>
+                        </div>
+                        <div className="text-gray-400">
+                          {p.dateDebut ? new Date(p.dateDebut).toLocaleDateString("fr-FR") : ""} →{" "}
+                          {p.dateFin ? new Date(p.dateFin).toLocaleDateString("fr-FR") : ""}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Emplois */}
+              {cipData.emplois.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Emplois obtenus</h3>
+                  <div className="space-y-2">
+                    {cipData.emplois.map((e: any) => (
+                      <div key={e.id} className="flex items-center justify-between p-2 bg-green-50 rounded text-sm">
+                        <div>
+                          <span className="font-medium">{e.entreprise || "-"}</span>
+                          <span className="text-gray-400 ml-2">
+                            — {e.poste || "-"} ({e.typeContrat || "-"})
+                          </span>
+                        </div>
+                        <div className="text-gray-400">
+                          {e.dateDebut ? new Date(e.dateDebut).toLocaleDateString("fr-FR") : ""}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {cipData.counts.entretiens === 0 &&
+                cipData.counts.pmsmp === 0 &&
+                cipData.counts.emplois === 0 && (
+                  <p className="text-sm text-gray-400">
+                    Aucune donnee CIP disponible pour ce beneficiaire.
+                  </p>
+                )}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400">Donnees CIP non disponibles.</p>
           )}
         </div>
       </div>

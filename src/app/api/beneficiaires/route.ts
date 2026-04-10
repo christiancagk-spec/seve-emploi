@@ -16,6 +16,8 @@ export async function GET(request: NextRequest) {
           select: {
             prospections: true,
             contacts: true,
+            entretiens: true,
+            evaluationsCip: true,
           },
         },
         prospections: {

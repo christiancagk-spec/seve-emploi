@@ -84,6 +84,12 @@ model Beneficiary {
   contacts          Contact[]
   reminders         Reminder[]
 
+  // Relations CIP (lecture seule dans SEVE)
+  entretiens        Entretien[]
+  evaluationsCip    EvaluationCip[]
+  pmsmpList         Pmsmp[]
+  emplois           Emploi[]
+
   @@map("beneficiaires")
 }
 
@@ -277,4 +283,68 @@ model Reminder {
   @@index([companyId])
   @@index([date])
   @@map("reminders")
+}
+
+// ============================================================
+// TABLES CIP — LECTURE SEULE DANS SEVE
+// ============================================================
+
+model Entretien {
+  id             Int          @id @default(autoincrement())
+  beneficiaireId Int          @map("beneficiaire_id")
+  beneficiaire   Beneficiary  @relation(fields: [beneficiaireId], references: [id])
+  dateEntretien  DateTime?    @map("date_entretien")
+  typeEntretien  String?      @map("type_entretien")
+  statut         String?
+  lieu           String?
+  notes          String?
+  createdAt      DateTime?    @default(now()) @map("created_at")
+  @@map("entretiens")
+}
+
+model EvaluationCip {
+  id               Int          @id @default(autoincrement())
+  beneficiaireId   Int          @map("beneficiaire_id")
+  beneficiaire     Beneficiary  @relation(fields: [beneficiaireId], references: [id])
+  typeEvaluation   String?      @map("type_evaluation")
+  dateEvaluation   DateTime?    @map("date_evaluation")
+  ponctualite      Int?
+  assiduite        Int?
+  motivation       Int?
+  autonomie        Int?
+  travailEquipe    Int?         @map("travail_equipe")
+  communication    Int?
+  respectConsignes Int?         @map("respect_consignes")
+  initiative       Int?
+  commentaire      String?
+  createdAt        DateTime?    @default(now()) @map("created_at")
+  @@map("evaluations")
+}
+
+model Pmsmp {
+  id             Int          @id @default(autoincrement())
+  beneficiaireId Int          @map("beneficiaire_id")
+  beneficiaire   Beneficiary  @relation(fields: [beneficiaireId], references: [id])
+  entreprise     String?
+  dateDebut      DateTime?    @map("date_debut")
+  dateFin        DateTime?    @map("date_fin")
+  bilan          String?
+  resultat       String?
+  createdAt      DateTime?    @default(now()) @map("created_at")
+  @@map("pmsmp")
+}
+
+model Emploi {
+  id             Int          @id @default(autoincrement())
+  beneficiaireId Int          @map("beneficiaire_id")
+  beneficiaire   Beneficiary  @relation(fields: [beneficiaireId], references: [id])
+  entreprise     String?
+  poste          String?
+  typeContrat    String?      @map("type_contrat")
+  dateDebut      DateTime?    @map("date_debut")
+  dateFin        DateTime?    @map("date_fin")
+  salaireBrut    Float?       @map("salaire_brut")
+  notes          String?
+  createdAt      DateTime?    @default(now()) @map("created_at")
+  @@map("emplois")
 }
