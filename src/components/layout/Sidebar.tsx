@@ -14,11 +14,12 @@ import {
 
 const AGK_BASE_URL = process.env.NEXT_PUBLIC_AGK_URL || "https://agk-app-production.up.railway.app";
 
-// Lien retour vers l'app AGK
-const agkReturnLink = {
-  name: "← Retour Suivi CIP",
-  href: `${AGK_BASE_URL}/suivi-cip`,
-};
+// Liens retour vers les autres modules de l'écosystème AGK
+const agkReturnLinks = [
+  { name: "← Retour Suivi CIP", href: `${AGK_BASE_URL}/suivi-cip` },
+  { name: "← Module RH", href: "https://module-rh-production-5cbb.up.railway.app" },
+  { name: "← Module Admin", href: "https://module-admin-production-bc45.up.railway.app" },
+];
 
 // Navigation du module Prospection (liens internes)
 const prospectionNav = [
@@ -102,15 +103,18 @@ export default function Sidebar({ isOpen, onClose, userRole }: SidebarProps) {
 
         {/* Navigation */}
         <nav className="mt-1 px-3 flex-1 overflow-y-auto">
-          {/* Lien retour Suivi CIP */}
+          {/* Liens retour écosystème AGK */}
           <div className="mb-3">
-            <a
-              href={agkReturnLink.href}
-              onClick={onClose}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-green-300/80 hover:bg-white/10 hover:text-white transition-colors"
-            >
-              {agkReturnLink.name}
-            </a>
+            {agkReturnLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={onClose}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-green-300/80 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                {link.name}
+              </a>
+            ))}
           </div>
 
           {/* Section Prospection SEVE */}
